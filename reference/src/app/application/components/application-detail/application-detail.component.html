@@ -1,0 +1,305 @@
+<div class="applications-page">
+  <!-- Use the shared navigation component -->
+  <app-nav></app-nav>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="header">
+      <button class="back-button" [routerLink]="['/applications']">
+        <i class="bi bi-arrow-left"></i> Back
+      </button>
+
+      <h1 *ngIf="!application">Application Details</h1>
+      <h1 *ngIf="application">Application #{{ application.applicationNumber }}</h1>
+    </div>
+
+    <!-- Loading indicator -->
+    <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading application details...</p>
+  </div>
+
+    <!-- Error message -->
+    <div *ngIf="hasError" class="alert alert-danger">
+      <p><i class="bi bi-exclamation-triangle"></i> {{ errorMessage }}</p>
+      <button class="btn btn-outline-danger" (click)="loadApplication(applicationId)">
+        <i class="bi bi-arrow-clockwise"></i> Try Again
+      </button>
+      </div>
+
+    <!-- Application content -->
+    <div *ngIf="application && !isLoading" class="application-content">
+      <!-- Application Status Bar -->
+      <div class="status-row">
+        <div class="status">
+          <span class="status-label">Status:</span>
+          <span class="status-badge" [ngClass]="getStatusClass(application.status)">
+            {{ getStatusDisplayText(application.status) }}
+          </span>
+        </div>
+        <div class="application-number">
+          <span class="label">Application Number:</span>
+          <span class="value">{{ application.applicationNumber }}</span>
+      </div>
+    </div>
+
+      <!-- Workflow Progress Bar -->
+      <div class="workflow-progress">
+        <div class="step" [ngClass]="{'active': application.status === ApplicationStatus.SUBMITTED || application.status === ApplicationStatus.UNDER_REVIEW_LP, 'completed': application.status === ApplicationStatus.APPROVED_BY_LP || application.status === ApplicationStatus.APPROVED_BY_MANAGER || application.status === ApplicationStatus.APPROVED}">
+          <div class="step-number">1</div>
+          <div class="step-label">L&P Review</div>
+        </div>
+        <div class="connector"></div>
+        <div class="step" [ngClass]="{'active': application.status === ApplicationStatus.UNDER_REVIEW_MANAGER, 'completed': application.status === ApplicationStatus.APPROVED_BY_MANAGER || application.status === ApplicationStatus.APPROVED, 'disabled': application.status === ApplicationStatus.SUBMITTED || application.status === ApplicationStatus.UNDER_REVIEW_LP || application.status === ApplicationStatus.RETURNED_BY_LP}">
+          <div class="step-number">2</div>
+          <div class="step-label">Manager Review</div>
+        </div>
+        <div class="connector"></div>
+        <div class="step" [ngClass]="{'active': application.status === ApplicationStatus.UNDER_REVIEW_COO, 'completed': application.status === ApplicationStatus.APPROVED, 'disabled': application.status !== ApplicationStatus.APPROVED_BY_MANAGER && application.status !== ApplicationStatus.UNDER_REVIEW_COO && application.status !== ApplicationStatus.APPROVED}">
+          <div class="step-number">3</div>
+          <div class="step-label">COO Review</div>
+        </div>
+      </div>
+
+      <!-- Workflow Actions -->
+      <app-workflow-actions
+        *ngIf="application && !isLoading"
+        [application]="application"
+        [userRole]="userRole"
+        [userId]="userId"
+        [userName]="userName"
+        (actionStarted)="handleActionStarted($event)"
+        (actionCompleted)="handleActionCompleted($event)"
+        (actionFailed)="handleActionFailed($event)">
+      </app-workflow-actions>
+
+      <!-- Role-specific notification -->
+      <div *ngIf="canReview" class="role-notification">
+        <i class="bi bi-info-circle"></i>
+        <ng-container *ngIf="isLPSpecialist && (application.status === ApplicationStatus.SUBMITTED || application.status === ApplicationStatus.UNDER_REVIEW_LP)">
+          This application is awaiting your review as a Land & Planning Specialist.
+        </ng-container>
+        <ng-container *ngIf="isAgricultureManager && (application.status === ApplicationStatus.APPROVED_BY_LP || application.status === ApplicationStatus.UNDER_REVIEW_MANAGER)">
+          This application has been approved by L&P and is awaiting your review as an Agriculture Relations Manager.
+        </ng-container>
+        <ng-container *ngIf="isCOO && (application.status === ApplicationStatus.APPROVED_BY_MANAGER || application.status === ApplicationStatus.UNDER_REVIEW_COO)">
+          This application has been approved by L&P and Management and is awaiting your final review as COO.
+        </ng-container>
+    </div>
+
+      <!-- Application Summary -->
+      <div class="detail-card">
+        <h2 class="section-title">Application Summary</h2>
+        <div class="detail-content">
+          <div class="detail-row">
+            <span class="label">ID:</span>
+            <span class="value">{{ application.id }}</span>
+              </div>
+          <div class="detail-row">
+            <span class="label">Title:</span>
+            <span class="value">{{ application.title }}</span>
+              </div>
+          <div class="detail-row">
+            <span class="label">Submitted Date:</span>
+            <span class="value">{{ application.submittedAt | date:'mediumDate' }}</span>
+              </div>
+          <div class="detail-row">
+            <span class="label">Last Updated:</span>
+            <span class="value">{{ application.updatedAt | date:'medium' }}</span>
+              </div>
+          <div class="detail-row">
+            <span class="label">Description:</span>
+            <span class="value">{{ application.description || 'N/A' }}</span>
+              </div>
+            </div>
+          </div>
+
+      <!-- Applicant Information -->
+      <div *ngIf="canSeeSection('applicant')" class="detail-card">
+        <h2 class="section-title">Applicant Information</h2>
+        <div class="detail-content">
+          <div class="detail-row">
+            <span class="label">Name:</span>
+            <span class="value">{{ application.applicant?.name || 'N/A' }}</span>
+              </div>
+          <div class="detail-row">
+            <span class="label">ID Number:</span>
+            <span class="value">{{ application.applicant?.nationalId || 'N/A' }}</span>
+              </div>
+          <div class="detail-row">
+            <span class="label">Phone:</span>
+            <span class="value">{{ application.applicant?.phone || 'N/A' }}</span>
+              </div>
+          <div class="detail-row">
+            <span class="label">Email:</span>
+            <span class="value">{{ application.applicant?.email || 'N/A' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Address:</span>
+            <span class="value">{{ application.applicant?.address || 'N/A' }}</span>
+                  </div>
+                </div>
+              </div>
+
+      <!-- Farm Location -->
+      <div *ngIf="canSeeSection('location')" class="detail-card">
+        <h2 class="section-title">Farm Location</h2>
+        <div class="detail-content">
+          <div class="detail-row">
+            <span class="label">Address:</span>
+            <span class="value">{{ application.farmLocation?.address || 'N/A' }}</span>
+                  </div>
+          <div class="detail-row">
+            <span class="label">Crops:</span>
+            <span class="value">{{ application.farmLocation?.crops?.join(', ') || 'N/A' }}</span>
+                  </div>
+                </div>
+              </div>
+
+      <!-- Documents -->
+      <div *ngIf="canSeeSection('documents') && application.documents && application.documents.length > 0" class="detail-card">
+        <h2 class="section-title">Documents</h2>
+        <div class="detail-content">
+          <div class="documents-list">
+            <div class="document-item" *ngFor="let doc of application.documents">
+              <span class="document-name">{{ doc.name }}</span>
+              <span class="document-type">{{ doc.type }}</span>
+              <a [href]="doc.url" target="_blank" class="document-link">
+                View Document
+              </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+      <!-- Review History -->
+      <div *ngIf="canSeeSection('reviews')" class="detail-card">
+        <h2 class="section-title">Review History</h2>
+        <div class="detail-content">
+          <div class="review-item" *ngFor="let review of application.reviews">
+            <div class="review-header">
+              <span class="reviewer-name">{{ review.reviewerName }}</span>
+              <span class="reviewer-role">({{ review.reviewerRole }})</span>
+              <span class="review-date">{{ review.timestamp | date:'medium' }}</span>
+            </div>
+            <div class="review-decision" [ngClass]="{'approved': review.decision === 'APPROVE', 'rejected': review.decision === 'REJECT', 'returned': review.decision === 'RETURN'}">
+              {{ getDecisionDisplayText(review.decision) }}
+            </div>
+            <div class="review-comments">
+              {{ review.comments }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LP Specialist-specific content -->
+      <div *ngIf="canSeeSection('lp-checklist')" class="detail-card highlight-card">
+        <h2 class="section-title">Land Planning Review Checklist</h2>
+        <div class="detail-content">
+          <div class="checklist-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Verify land plot availability</span>
+          </div>
+          <div class="checklist-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Check zoning compliance</span>
+              </div>
+          <div class="checklist-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Validate property boundaries</span>
+              </div>
+          <div class="checklist-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Review environmental impact</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manager-specific content -->
+      <div *ngIf="canSeeSection('manager-checklist')" class="detail-card highlight-card">
+        <h2 class="section-title">Agriculture Management Review Checklist</h2>
+        <div class="detail-content">
+          <div class="checklist-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Verify crop suitability for region</span>
+                </div>
+          <div class="checklist-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Check water source availability</span>
+              </div>
+          <div class="checklist-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Assess agricultural viability</span>
+          </div>
+          <div class="checklist-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Review compliance with agricultural policies</span>
+                </div>
+              </div>
+            </div>
+
+      <!-- COO-specific content -->
+      <div *ngIf="canSeeSection('coo-checklist')" class="detail-card highlight-card">
+        <h2 class="section-title">Final Approval Checklist</h2>
+        <div class="detail-content">
+          <div class="checklist-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Verify all previous approvals</span>
+          </div>
+          <div class="checklist-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Check strategic alignment</span>
+          </div>
+          <div class="checklist-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Review resource allocation</span>
+            </div>
+          <div class="checklist-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Confirm policy compliance</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review Form (if user has permission) -->
+      <div *ngIf="canReview" class="review-section">
+        <h2 class="section-title">{{ getRoleSpecificTitle() }}</h2>
+        <form [formGroup]="reviewForm" (ngSubmit)="submitReview()">
+          <div class="form-group">
+            <label>Decision</label>
+            <div class="radio-group">
+              <ng-container *ngFor="let option of getDecisionOptions()">
+                <div class="radio-option">
+                  <input type="radio" id="{{ option.value }}" formControlName="decision" [value]="option.value">
+                  <label [for]="option.value">{{ option.label }}</label>
+              </div>
+              </ng-container>
+            </div>
+            <div *ngIf="reviewForm.get('decision').invalid && reviewForm.get('decision').touched" class="error-text">
+              Decision is required
+                </div>
+              </div>
+
+          <div class="form-group">
+            <label>Comments</label>
+            <textarea formControlName="comments" rows="4" placeholder="Enter your review comments here..."></textarea>
+            <div *ngIf="reviewForm.get('comments').invalid && reviewForm.get('comments').touched" class="error-text">
+              <div *ngIf="reviewForm.get('comments').errors?.required">Comments are required</div>
+              <div *ngIf="reviewForm.get('comments').errors?.maxlength">Comments are too long (max 500 characters)</div>
+                </div>
+              </div>
+
+          <div class="form-actions">
+            <button type="submit" [disabled]="reviewForm.invalid || isSubmitting" class="submit-btn">
+              <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm"></span>
+              Submit Review
+            </button>
+          </div>
+
+          <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+          <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

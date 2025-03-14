@@ -1,0 +1,191 @@
+<app-nav></app-nav>
+<div class="workflow-test-container">
+  <div class="main-header">
+    <div>
+      <button class="back-button" (click)="goBack()">
+        <i class="bi bi-arrow-left"></i> Back to Applications
+      </button>
+      <h1 class="workflow-title">Agricultural Record Application</h1>
+    </div>
+  </div>
+
+  <!-- Status and Messages -->
+  <div class="status-container">
+    <div *ngIf="isLoading" class="loading-indicator">
+      <div class="spinner"></div>
+      <p>{{ statusMessage }}</p>
+    </div>
+    <div *ngIf="errorMessage" class="error-message alert alert-danger">
+      <i class="bi bi-exclamation-circle me-2"></i>
+      <p>{{ errorMessage }}</p>
+    </div>
+    <div *ngIf="statusMessage && !isLoading" class="status-message alert alert-info">
+      <i class="bi bi-info-circle me-2"></i>
+      <p>{{ statusMessage }}</p>
+    </div>
+  </div>
+
+  <!-- Application Info -->
+  <div *ngIf="application" class="application-info card">
+    <div class="card-header">
+      <div class="card-title">
+        <h2>{{ application.title }}</h2>
+        <span class="id-display">#{{ application.id }}</span>
+      </div>
+      <span class="status-badge" [ngClass]="getStatusClass(application.status)">
+        {{ getStatusDisplayValue(application.status) }}
+      </span>
+    </div>
+    <div class="card-body">
+      <div class="application-details">
+        <div class="detail-row">
+          <span class="label">Application ID:</span>
+          <span class="value">{{ application.id }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Application Number:</span>
+          <span class="value">{{ application.applicationNumber }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Applicant:</span>
+          <span class="value">{{ application.applicant.name }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Farm Location:</span>
+          <span class="value">{{ application.farmLocation.address }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Process Section -->
+  <div *ngIf="application" class="section">
+    <h2 class="section-heading">
+      <i class="bi bi-list-check me-2"></i>
+      Application Process
+    </h2>
+    <div class="workflow-steps">
+      <div *ngFor="let step of workflowSteps; let i = index"
+           class="workflow-step"
+           [ngClass]="getStepClass(i)">
+        <div class="step-header">
+          <div class="step-number">{{ i + 1 }}</div>
+          <div class="step-title">{{ step.label }}</div>
+          <div class="step-status" *ngIf="i < currentStep">
+            <span class="badge badge-success"><i class="bi bi-check"></i> Completed</span>
+          </div>
+          <div class="step-status" *ngIf="i === currentStep">
+            <span class="badge badge-primary"><i class="bi bi-arrow-right"></i> Current</span>
+          </div>
+        </div>
+        <div class="step-content">
+          <!-- Step 1: L&P Specialist Review -->
+          <div *ngIf="i === 1 && currentStep === 0 && application" class="step-actions">
+            <button class="btn btn-primary"
+                    (click)="startLPSpecialistReview()"
+                    [disabled]="isLoading">
+              <i class="bi bi-clipboard-check"></i> Send to L&P Specialist Review
+            </button>
+          </div>
+
+          <!-- Step 2: L&P Specialist Decision -->
+          <div *ngIf="i === 2 && currentStep === 1 && application" class="step-actions">
+            <button class="btn btn-success"
+                    (click)="approveLPSpecialist()"
+                    [disabled]="isLoading">
+              <i class="bi bi-check-circle"></i> Approve
+            </button>
+
+            <button class="btn btn-warning"
+                    (click)="returnApplication('LP_SPECIALIST')"
+                    [disabled]="isLoading">
+              <i class="bi bi-arrow-return-left"></i> Return for Revision
+            </button>
+
+            <button class="btn btn-danger"
+                    (click)="rejectApplication('LP_SPECIALIST')"
+                    [disabled]="isLoading">
+              <i class="bi bi-x-circle"></i> Reject Application
+            </button>
+          </div>
+
+          <!-- Step 3: Manager Review -->
+          <div *ngIf="i === 3 && currentStep === 2 && application" class="step-actions">
+            <button class="btn btn-primary"
+                    (click)="startManagerReview()"
+                    [disabled]="isLoading">
+              <i class="bi bi-clipboard-check"></i> Send to Manager Review
+            </button>
+          </div>
+
+          <!-- Step 4: Manager Decision -->
+          <div *ngIf="i === 4 && currentStep === 3 && application" class="step-actions">
+            <button class="btn btn-success"
+                    (click)="approveManager()"
+                    [disabled]="isLoading">
+              <i class="bi bi-check-circle"></i> Approve
+            </button>
+
+            <button class="btn btn-warning"
+                    (click)="returnApplication('AGRICULTURE_MANAGER')"
+                    [disabled]="isLoading">
+              <i class="bi bi-arrow-return-left"></i> Return for Revision
+            </button>
+          </div>
+
+          <!-- Step 5: COO Review -->
+          <div *ngIf="i === 5 && currentStep === 4 && application" class="step-actions">
+            <button class="btn btn-primary"
+                    (click)="startCOOReview()"
+                    [disabled]="isLoading">
+              <i class="bi bi-clipboard-check"></i> Send to COO Review
+            </button>
+          </div>
+
+          <!-- Step 6: COO Decision -->
+          <div *ngIf="i === 6 && currentStep === 5 && application" class="step-actions">
+            <button class="btn btn-success"
+                    (click)="approveCOO()"
+                    [disabled]="isLoading">
+              <i class="bi bi-check-circle"></i> Approve
+            </button>
+
+            <button class="btn btn-warning"
+                    (click)="returnApplication('COO')"
+                    [disabled]="isLoading">
+              <i class="bi bi-arrow-return-left"></i> Return for Revision
+            </button>
+
+            <button class="btn btn-danger"
+                    (click)="rejectCOO()"
+                    [disabled]="isLoading">
+              <i class="bi bi-x-circle"></i> Reject Application
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application History -->
+  <div *ngIf="application && application.reviews && application.reviews.length > 0" class="section">
+    <h2 class="section-heading">
+      <i class="bi bi-clock-history me-2"></i>
+      Application History
+    </h2>
+    <div class="application-timeline">
+      <div class="timeline">
+        <div *ngFor="let review of application.reviews" class="timeline-item">
+          <div class="timeline-icon" [ngClass]="{'approved': review.decision === 'APPROVE', 'returned': review.decision === 'REQUEST_CHANGES', 'rejected': review.decision === 'REJECT'}">
+            <i class="bi" [ngClass]="{'bi-check': review.decision === 'APPROVE', 'bi-arrow-return-left': review.decision === 'REQUEST_CHANGES', 'bi-x': review.decision === 'REJECT'}"></i>
+          </div>
+          <div class="timeline-content">
+            <h4>{{ review.reviewerName }} ({{ review.reviewerRole }})</h4>
+            <p>{{ review.comments }}</p>
+            <span class="timeline-date">{{ review.timestamp | date:'medium' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

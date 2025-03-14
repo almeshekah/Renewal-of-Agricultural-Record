@@ -1,0 +1,75 @@
+<div class="review-page-container">
+  <div class="header">
+    <button class="back-button" [routerLink]="['/applications']">
+      <i class="fas fa-arrow-left"></i> {{ 'application.detail.back' | translate }}
+    </button>
+    <h1>{{ 'application.review.manager_title' | translate }}</h1>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>{{ 'common.loading' | translate }}</p>
+  </div>
+
+  <div *ngIf="loadingError" class="alert alert-danger">
+    <p>{{ loadingError }}</p>
+    <button class="btn btn-outline-danger" (click)="loadApplication()">
+      {{ 'application.detail.try_again' | translate }}
+    </button>
+  </div>
+
+  <div *ngIf="application && !isLoading" class="review-content">
+    <!-- Basic Application Info -->
+    <div class="detail-card">
+      <h2 class="section-title">{{ 'application.detail.summary' | translate }}</h2>
+      <div class="detail-content">
+        <div class="detail-row">
+          <span class="label">{{ 'application.detail.title_field' | translate }}:</span>
+          <span class="value">{{ application.title }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">{{ 'application.detail.status' | translate }}:</span>
+          <span class="value status-badge" [ngClass]="getStatusClass(application.status)">
+            {{ 'application.status.' + getStatusLabel(application.status) | translate }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manager Review Form -->
+    <div class="detail-card review-section">
+      <h2 class="section-title">{{ 'application.review.manager_review_title' | translate }}</h2>
+
+      <div class="detail-content">
+        <div *ngIf="errorMessage" class="alert alert-danger">
+          <p>{{ errorMessage }}</p>
+        </div>
+        <div *ngIf="successMessage" class="alert alert-success">
+          <p>{{ successMessage }}</p>
+        </div>
+
+        <form [formGroup]="reviewForm" (ngSubmit)="submitReview()">
+          <div class="form-group">
+            <label for="decision">{{ 'application.review.decision' | translate }}</label>
+            <select id="decision" formControlName="decision" class="form-control">
+              <option value="APPROVE">{{ 'application.review.manager_approve' | translate }}</option>
+              <option value="RETURN">{{ 'application.review.manager_return' | translate }}</option>
+              <option value="REJECT">{{ 'application.review.manager_reject' | translate }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="comments">{{ 'application.review.comments' | translate }}</label>
+            <textarea id="comments" formControlName="comments" class="form-control" rows="4"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="isSubmitting || reviewForm.invalid || !isReviewEligible()">
+              {{ 'application.review.submit_button' | translate }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

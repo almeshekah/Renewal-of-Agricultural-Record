@@ -1,0 +1,288 @@
+<div class="application-form-container">
+  <div class="card">
+    <div class="card-header">
+      <h2>{{ 'application.form.title' | translate }}</h2>
+      <p>{{ 'application.form.subtitle' | translate }}</p>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="applicationForm" (ngSubmit)="onSubmit()">
+        <!-- Alert messages -->
+        <div *ngIf="errorMessage" class="alert alert-danger">
+          {{ errorMessage }}
+        </div>
+        <div *ngIf="successMessage" class="alert alert-success">
+          {{ successMessage }}
+        </div>
+
+        <!-- Basic Information -->
+        <div class="section-header">
+          <h3>{{ 'application.form.basic_info' | translate }}</h3>
+        </div>
+
+        <div class="form-group">
+          <label for="title">{{ 'application.form.title_field' | translate }} *</label>
+          <input
+            type="text"
+            id="title"
+            formControlName="title"
+            class="form-control"
+            [placeholder]="'application.form.title_placeholder' | translate"
+            [ngClass]="{'is-invalid': applicationForm.get('title').invalid && applicationForm.get('title').touched}"
+          >
+          <div *ngIf="applicationForm.get('title').invalid && applicationForm.get('title').touched" class="invalid-feedback">
+            <div *ngIf="applicationForm.get('title').errors?.required">
+              {{ 'application.form.title_required' | translate }}
+            </div>
+            <div *ngIf="applicationForm.get('title').errors?.minlength">
+              {{ 'application.form.title_min_length' | translate }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Applicant Information -->
+        <div class="section-header">
+          <h3>{{ 'application.form.applicant_info' | translate }}</h3>
+        </div>
+
+        <div formGroupName="applicant">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="applicantName">{{ 'application.form.applicant_name' | translate }} *</label>
+                <input
+                  type="text"
+                  id="applicantName"
+                  formControlName="name"
+                  class="form-control"
+                  [placeholder]="'application.form.applicant_name_placeholder' | translate"
+                  [ngClass]="{'is-invalid': applicationForm.get('applicant.name').invalid && applicationForm.get('applicant.name').touched}"
+                >
+                <div *ngIf="applicationForm.get('applicant.name').invalid && applicationForm.get('applicant.name').touched" class="invalid-feedback">
+                  {{ 'application.form.applicant_name_required' | translate }}
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="applicantNationalId">{{ 'application.form.applicant_national_id' | translate }} *</label>
+                <input
+                  type="text"
+                  id="applicantNationalId"
+                  formControlName="nationalId"
+                  class="form-control"
+                  [placeholder]="'application.form.applicant_national_id_placeholder' | translate"
+                  [ngClass]="{'is-invalid': applicationForm.get('applicant.nationalId').invalid && applicationForm.get('applicant.nationalId').touched}"
+                >
+                <div *ngIf="applicationForm.get('applicant.nationalId').invalid && applicationForm.get('applicant.nationalId').touched" class="invalid-feedback">
+                  {{ 'application.form.applicant_national_id_required' | translate }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="applicantEmail">{{ 'application.form.applicant_email' | translate }} *</label>
+                <input
+                  type="email"
+                  id="applicantEmail"
+                  formControlName="email"
+                  class="form-control"
+                  [placeholder]="'application.form.applicant_email_placeholder' | translate"
+                  [ngClass]="{'is-invalid': applicationForm.get('applicant.email').invalid && applicationForm.get('applicant.email').touched}"
+                >
+                <div *ngIf="applicationForm.get('applicant.email').invalid && applicationForm.get('applicant.email').touched" class="invalid-feedback">
+                  <div *ngIf="applicationForm.get('applicant.email').errors?.required">
+                    {{ 'application.form.applicant_email_required' | translate }}
+                  </div>
+                  <div *ngIf="applicationForm.get('applicant.email').errors?.email">
+                    {{ 'application.form.applicant_email_invalid' | translate }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="applicantPhone">{{ 'application.form.applicant_phone' | translate }} *</label>
+                <input
+                  type="tel"
+                  id="applicantPhone"
+                  formControlName="phone"
+                  class="form-control"
+                  [placeholder]="'application.form.applicant_phone_placeholder' | translate"
+                  [ngClass]="{'is-invalid': applicationForm.get('applicant.phone').invalid && applicationForm.get('applicant.phone').touched}"
+                >
+                <div *ngIf="applicationForm.get('applicant.phone').invalid && applicationForm.get('applicant.phone').touched" class="invalid-feedback">
+                  {{ 'application.form.applicant_phone_required' | translate }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="applicantAddress">{{ 'application.form.applicant_address' | translate }} *</label>
+            <textarea
+              id="applicantAddress"
+              formControlName="address"
+              class="form-control"
+              [placeholder]="'application.form.applicant_address_placeholder' | translate"
+              [ngClass]="{'is-invalid': applicationForm.get('applicant.address').invalid && applicationForm.get('applicant.address').touched}"
+              rows="3"
+            ></textarea>
+            <div *ngIf="applicationForm.get('applicant.address').invalid && applicationForm.get('applicant.address').touched" class="invalid-feedback">
+              {{ 'application.form.applicant_address_required' | translate }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Farm Location Information -->
+        <div class="section-header">
+          <h3>{{ 'application.form.farm_location' | translate }}</h3>
+        </div>
+
+        <div formGroupName="farmLocation">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="farmCity">{{ 'application.form.farm_city' | translate }} *</label>
+                <input
+                  type="text"
+                  id="farmCity"
+                  formControlName="city"
+                  class="form-control"
+                  [placeholder]="'application.form.farm_city_placeholder' | translate"
+                  [ngClass]="{'is-invalid': applicationForm.get('farmLocation.city').invalid && applicationForm.get('farmLocation.city').touched}"
+                >
+                <div *ngIf="applicationForm.get('farmLocation.city').invalid && applicationForm.get('farmLocation.city').touched" class="invalid-feedback">
+                  {{ 'application.form.farm_city_required' | translate }}
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="farmDistrict">{{ 'application.form.farm_district' | translate }} *</label>
+                <input
+                  type="text"
+                  id="farmDistrict"
+                  formControlName="district"
+                  class="form-control"
+                  [placeholder]="'application.form.farm_district_placeholder' | translate"
+                  [ngClass]="{'is-invalid': applicationForm.get('farmLocation.district').invalid && applicationForm.get('farmLocation.district').touched}"
+                >
+                <div *ngIf="applicationForm.get('farmLocation.district').invalid && applicationForm.get('farmLocation.district').touched" class="invalid-feedback">
+                  {{ 'application.form.farm_district_required' | translate }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="farmAddress">{{ 'application.form.farm_address' | translate }} *</label>
+            <textarea
+              id="farmAddress"
+              formControlName="address"
+              class="form-control"
+              [placeholder]="'application.form.farm_address_placeholder' | translate"
+              [ngClass]="{'is-invalid': applicationForm.get('farmLocation.address').invalid && applicationForm.get('farmLocation.address').touched}"
+              rows="3"
+            ></textarea>
+            <div *ngIf="applicationForm.get('farmLocation.address').invalid && applicationForm.get('farmLocation.address').touched" class="invalid-feedback">
+              {{ 'application.form.farm_address_required' | translate }}
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="farmSize">{{ 'application.form.farm_size' | translate }} ({{ 'application.form.hectares' | translate }}) *</label>
+                <input
+                  type="number"
+                  id="farmSize"
+                  formControlName="size"
+                  class="form-control"
+                  [placeholder]="'application.form.farm_size_placeholder' | translate"
+                  [ngClass]="{'is-invalid': applicationForm.get('farmLocation.size').invalid && applicationForm.get('farmLocation.size').touched}"
+                  min="0.1"
+                  step="0.1"
+                >
+                <div *ngIf="applicationForm.get('farmLocation.size').invalid && applicationForm.get('farmLocation.size').touched" class="invalid-feedback">
+                  <div *ngIf="applicationForm.get('farmLocation.size').errors?.required">
+                    {{ 'application.form.farm_size_required' | translate }}
+                  </div>
+                  <div *ngIf="applicationForm.get('farmLocation.size').errors?.min">
+                    {{ 'application.form.farm_size_min' | translate }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="farmCrops">{{ 'application.form.farm_crops' | translate }} *</label>
+                <input
+                  type="text"
+                  id="farmCrops"
+                  formControlName="crops"
+                  class="form-control"
+                  [placeholder]="'application.form.farm_crops_placeholder' | translate"
+                  [ngClass]="{'is-invalid': applicationForm.get('farmLocation.crops').invalid && applicationForm.get('farmLocation.crops').touched}"
+                >
+                <div *ngIf="applicationForm.get('farmLocation.crops').invalid && applicationForm.get('farmLocation.crops').touched" class="invalid-feedback">
+                  {{ 'application.form.farm_crops_required' | translate }}
+                </div>
+                <small class="form-text text-muted">{{ 'application.form.farm_crops_help' | translate }}</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="farmCoordinates">{{ 'application.form.farm_coordinates' | translate }}</label>
+            <input
+              type="text"
+              id="farmCoordinates"
+              formControlName="coordinates"
+              class="form-control"
+              [placeholder]="'application.form.farm_coordinates_placeholder' | translate"
+            >
+            <small class="form-text text-muted">{{ 'application.form.farm_coordinates_help' | translate }}</small>
+          </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="section-header">
+          <h3>{{ 'application.form.additional_info' | translate }}</h3>
+        </div>
+
+        <div class="form-group">
+          <label for="additionalInfo">{{ 'application.form.additional_info_label' | translate }}</label>
+          <textarea
+            id="additionalInfo"
+            formControlName="additionalInfo"
+            class="form-control"
+            [placeholder]="'application.form.additional_info_placeholder' | translate"
+            rows="4"
+          ></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="btn btn-primary btn-lg"
+            [disabled]="isSubmitting"
+          >
+            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm mr-1"></span>
+            {{ 'application.form.submit_button' | translate }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary btn-lg ml-2"
+            [routerLink]="['/application']"
+          >
+            {{ 'application.form.cancel_button' | translate }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

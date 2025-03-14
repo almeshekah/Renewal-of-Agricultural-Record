@@ -1,0 +1,186 @@
+<div class="application-form-container">
+  <h2>{{ 'ApplicationForm.Title' | translate }}</h2>
+  <form [formGroup]="applicationForm" (ngSubmit)="onSubmit()" class="application-form">
+    <!-- Farm Details Section -->
+    <div class="form-section" formGroupName="farmDetails">
+      <h3>{{ 'ApplicationForm.FarmDetails' | translate }}</h3>
+
+      <div class="form-group">
+        <label for="farmName">{{ 'ApplicationForm.FarmName' | translate }}</label>
+        <input
+          type="text"
+          id="farmName"
+          formControlName="farmName"
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="registrationNumber">{{ 'ApplicationForm.RegistrationNumber' | translate }}</label>
+        <input
+          type="text"
+          id="registrationNumber"
+          formControlName="registrationNumber"
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="location">{{ 'ApplicationForm.Location' | translate }}</label>
+        <select id="location" formControlName="location" class="form-control">
+          <option value="">{{ 'ApplicationForm.SelectRegion' | translate }}</option>
+          <option *ngFor="let region of regions" [value]="region">{{region}}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="size">{{ 'ApplicationForm.Size' | translate }}</label>
+        <input
+          type="number"
+          id="size"
+          formControlName="size"
+          class="form-control"
+          min="0"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="cropTypes">{{ 'ApplicationForm.CropTypes' | translate }}</label>
+        <select id="cropTypes" formControlName="cropTypes" class="form-control" multiple>
+          <option *ngFor="let crop of cropTypes" [value]="crop">{{crop}}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Owner Details Section -->
+    <div class="form-section" formGroupName="ownerDetails">
+      <h3>{{ 'ApplicationForm.OwnerDetails' | translate }}</h3>
+
+      <div class="form-group">
+        <label for="name">{{ 'ApplicationForm.OwnerName' | translate }}</label>
+        <input
+          type="text"
+          id="name"
+          formControlName="name"
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="nationalId">{{ 'ApplicationForm.NationalId' | translate }}</label>
+        <input
+          type="text"
+          id="nationalId"
+          formControlName="nationalId"
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="email">{{ 'ApplicationForm.Email' | translate }}</label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="phone">{{ 'ApplicationForm.Phone' | translate }}</label>
+        <input
+          type="tel"
+          id="phone"
+          formControlName="phone"
+          class="form-control"
+          placeholder="05xxxxxxxx"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="address">{{ 'ApplicationForm.Address' | translate }}</label>
+        <textarea
+          id="address"
+          formControlName="address"
+          class="form-control"
+          rows="3"
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- Documents Section -->
+    <div class="form-section" formGroupName="documents">
+      <h3>{{ 'ApplicationForm.Documents' | translate }}</h3>
+
+      <div class="form-group">
+        <label for="registrationCertificate">
+          {{ 'ApplicationForm.RegistrationCertificate' | translate }}
+        </label>
+        <input
+          type="file"
+          id="registrationCertificate"
+          (change)="onFileChange($event, 'registrationCertificate')"
+          class="form-control"
+          accept=".pdf,.jpg,.jpeg,.png"
+        />
+        <button
+          type="button"
+          class="btn btn-link"
+          *ngIf="applicationForm.get('documents')?.get('registrationCertificate')?.value"
+          (click)="removeFile('registrationCertificate')"
+        >
+          {{ 'ApplicationForm.RemoveFile' | translate }}
+        </button>
+      </div>
+
+      <div class="form-group">
+        <label for="landDeed">{{ 'ApplicationForm.LandDeed' | translate }}</label>
+        <input
+          type="file"
+          id="landDeed"
+          (change)="onFileChange($event, 'landDeed')"
+          class="form-control"
+          accept=".pdf,.jpg,.jpeg,.png"
+        />
+        <button
+          type="button"
+          class="btn btn-link"
+          *ngIf="applicationForm.get('documents')?.get('landDeed')?.value"
+          (click)="removeFile('landDeed')"
+        >
+          {{ 'ApplicationForm.RemoveFile' | translate }}
+        </button>
+      </div>
+
+      <div class="form-group">
+        <label for="environmentalCompliance">
+          {{ 'ApplicationForm.EnvironmentalCompliance' | translate }}
+        </label>
+        <input
+          type="file"
+          id="environmentalCompliance"
+          (change)="onFileChange($event, 'environmentalCompliance')"
+          class="form-control"
+          accept=".pdf,.jpg,.jpeg,.png"
+        />
+        <button
+          type="button"
+          class="btn btn-link"
+          *ngIf="applicationForm.get('documents')?.get('environmentalCompliance')?.value"
+          (click)="removeFile('environmentalCompliance')"
+        >
+          {{ 'ApplicationForm.RemoveFile' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">
+        {{ 'ApplicationForm.Submit' | translate }}
+      </button>
+      <button type="button" class="btn btn-secondary" routerLink="/applications">
+        {{ 'ApplicationForm.Cancel' | translate }}
+      </button>
+    </div>
+  </form>
+</div>

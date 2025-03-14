@@ -1,0 +1,53 @@
+{
+  "AbpAccount": {
+    "Login": "Login",
+    "EmailAddress": "Email Address",
+    "Password": "Password",
+    "RememberMe": "Remember Me",
+    "ThisFieldIsRequired": "This field is required",
+    "InvalidEmailAddress": "Invalid email address",
+    "PasswordTooShort": "Password must be at least 6 characters",
+    "SelectRole": "Select Role",
+    "Role": "Role"
+  },
+  "ApplicationForm": {
+    "Title": "Agricultural Record Renewal Application",
+    "FarmDetails": "Farm Details",
+    "FarmName": "Farm Name",
+    "RegistrationNumber": "Registration Number",
+    "Location": "Location",
+    "Size": "Size (in hectares)",
+    "CropTypes": "Crop Types",
+    "SelectRegion": "Select Region",
+    "OwnerDetails": "Owner Details",
+    "OwnerName": "Owner Name",
+    "NationalId": "National ID",
+    "Email": "Email",
+    "Phone": "Phone Number",
+    "Address": "Address",
+    "Documents": "Required Documents",
+    "RegistrationCertificate": "Registration Certificate",
+    "LandDeed": "Land Deed",
+    "EnvironmentalCompliance": "Environmental Compliance Certificate",
+    "RemoveFile": "Remove File",
+    "Submit": "Submit Application",
+    "Cancel": "Cancel"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "subtitle": "Please fill out the following information to sign in",
+      "username": "National ID / Iqama Number",
+      "usernamePlaceholder": "Enter National ID / Iqama Number",
+      "usernameRequired": "National ID / Iqama Number is required",
+      "password": "Password",
+      "passwordRequired": "Password is required",
+      "rememberMe": "Remember Me",
+      "forgotPassword": "Forgot Password?",
+      "signIn": "Sign In",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create an account",
+      "invalidCredentials": "Invalid username or password"
+    }
+  }
+}

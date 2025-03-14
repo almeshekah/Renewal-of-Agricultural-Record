@@ -1,0 +1,132 @@
+<div class="review-page-container">
+  <div class="header">
+    <button class="back-button" [routerLink]="['/applications']">
+      <i class="fas fa-arrow-left"></i> {{ 'application.detail.back' | translate }}
+    </button>
+    <h1>{{ 'application.review.coo_title' | translate }}</h1>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>{{ 'common.loading' | translate }}</p>
+  </div>
+
+  <div *ngIf="loadingError" class="alert alert-danger">
+    <p>{{ loadingError }}</p>
+    <button class="btn btn-outline-danger" (click)="loadApplication()">
+      {{ 'application.detail.try_again' | translate }}
+    </button>
+  </div>
+
+  <div *ngIf="application && !isLoading" class="review-content">
+    <!-- Application Summary -->
+    <div class="detail-card">
+      <h2 class="section-title">{{ 'application.detail.summary' | translate }}</h2>
+      <div class="detail-content">
+        <div class="status-row">
+          <div class="status">
+            <span class="status-label">{{ 'application.detail.status' | translate }}:</span>
+            <span class="status-badge" [ngClass]="getStatusClass(application.status)">
+              {{ 'application.status.' + getStatusLabel(application.status) | translate }}
+            </span>
+          </div>
+          <div class="application-number">
+            <span class="label">{{ 'application.detail.application_number' | translate }}:</span>
+            <span class="value">{{ application.applicationNumber }}</span>
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <span class="label">{{ 'application.detail.title_field' | translate }}:</span>
+          <span class="value">{{ application.title }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">{{ 'application.detail.submitted_date' | translate }}:</span>
+          <span class="value">{{ application.submittedAt | date:'mediumDate' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Previous Reviews -->
+    <div class="detail-card" *ngIf="application.reviews && application.reviews.length > 0">
+      <h2 class="section-title">{{ 'application.review.previous_reviews' | translate }}</h2>
+      <div class="detail-content">
+        <div *ngFor="let review of application.reviews" class="review-item">
+          <div class="review-header">
+            <span class="reviewer-role">{{ 'application.review.role_' + review.reviewerRole.toLowerCase() | translate }}</span>
+            <span class="review-date">{{ review.createdAt | date:'medium' }}</span>
+          </div>
+          <div class="review-decision" [ngClass]="{'approved': review.decision === 'APPROVE', 'returned': review.decision === 'RETURN', 'rejected': review.decision === 'REJECT'}">
+            {{ 'application.review.decision_' + review.decision.toLowerCase() | translate }}
+          </div>
+          <div class="review-comments">
+            <p>{{ review.comments }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COO Review Form -->
+    <div class="detail-card review-section">
+      <h2 class="section-title">{{ 'application.review.coo_review_title' | translate }}</h2>
+
+      <div class="detail-content">
+        <div class="alert alert-info">
+          <p>{{ 'application.review.coo_instructions' | translate }}</p>
+        </div>
+
+        <!-- Alert messages -->
+        <div *ngIf="errorMessage" class="alert alert-danger">
+          <p>{{ errorMessage }}</p>
+        </div>
+        <div *ngIf="successMessage" class="alert alert-success">
+          <p>{{ successMessage }}</p>
+        </div>
+
+        <form [formGroup]="reviewForm" (ngSubmit)="submitReview()">
+          <div class="form-group">
+            <label for="decision">{{ 'application.review.decision' | translate }} *</label>
+            <select
+              id="decision"
+              formControlName="decision"
+              class="form-control"
+              [class.is-invalid]="reviewForm.get('decision').invalid && reviewForm.get('decision').touched"
+            >
+              <option value="APPROVE">{{ 'application.review.coo_approve' | translate }}</option>
+              <option value="REJECT">{{ 'application.review.coo_reject' | translate }}</option>
+            </select>
+            <div *ngIf="reviewForm.get('decision').invalid && reviewForm.get('decision').touched" class="invalid-feedback">
+              {{ 'application.review.decision_required' | translate }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="comments">{{ 'application.review.comments' | translate }} *</label>
+            <textarea
+              id="comments"
+              formControlName="comments"
+              class="form-control"
+              rows="4"
+              [placeholder]="'application.review.comments_placeholder' | translate"
+              [class.is-invalid]="reviewForm.get('comments').invalid && reviewForm.get('comments').touched"
+            ></textarea>
+            <div *ngIf="reviewForm.get('comments').invalid && reviewForm.get('comments').touched" class="invalid-feedback">
+              {{ 'application.review.comments_required' | translate }}
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="isSubmitting || reviewForm.invalid || !isReviewEligible()"
+            >
+              <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm mr-1"></span>
+              {{ 'application.review.submit_button' | translate }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

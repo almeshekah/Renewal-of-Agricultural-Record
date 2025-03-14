@@ -1,0 +1,9 @@
+﻿using Xunit;
+
+namespace AgriculturalRecordRenewal.EntityFrameworkCore;
+
+[CollectionDefinition(AgriculturalRecordRenewalTestConsts.CollectionDefinitionName)]
+public class AgriculturalRecordRenewalEntityFrameworkCoreCollection : ICollectionFixture<AgriculturalRecordRenewalEntityFrameworkCoreFixture>
+{
+
+}

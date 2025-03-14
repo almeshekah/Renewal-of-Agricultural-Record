@@ -1,0 +1,346 @@
+.review-page-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Open Sans', sans-serif;
+
+  .header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+
+    .back-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border: none;
+      background: none;
+      color: #8B5E3C;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        color: darken(#8B5E3C, 10%);
+      }
+
+      i {
+        font-size: 16px;
+      }
+    }
+
+    h1 {
+      margin: 0;
+      color: #8B5E3C;
+      font-size: 24px;
+      font-weight: 600;
+    }
+  }
+
+  .detail-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 24px;
+    overflow: hidden;
+
+    .section-title {
+      padding: 16px 24px;
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #8B5E3C;
+      border-bottom: 1px solid rgba(139, 94, 60, 0.1);
+    }
+
+    .detail-content {
+      padding: 24px;
+    }
+  }
+
+  .review-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+    padding: 24px;
+    background: #F8F5F1;
+    border-radius: 8px;
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      border: none;
+      border-radius: 8px;
+
+      i {
+        font-size: 16px;
+      }
+
+      &.btn-success {
+        background: linear-gradient(45deg, #2E8B57, #3CB371);
+        color: white;
+
+        &:hover:not(:disabled) {
+          background: linear-gradient(45deg, darken(#2E8B57, 5%), darken(#3CB371, 5%));
+          transform: translateY(-1px);
+        }
+      }
+
+      &.btn-warning {
+        background: linear-gradient(45deg, #F2994A, #F2C94C);
+        color: white;
+
+        &:hover:not(:disabled) {
+          background: linear-gradient(45deg, darken(#F2994A, 5%), darken(#F2C94C, 5%));
+          transform: translateY(-1px);
+        }
+      }
+
+      &.btn-danger {
+        background: linear-gradient(45deg, #EB5757, #FF6B6B);
+        color: white;
+
+        &:hover:not(:disabled) {
+          background: linear-gradient(45deg, darken(#EB5757, 5%), darken(#FF6B6B, 5%));
+          transform: translateY(-1px);
+        }
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+    }
+  }
+
+  .submit-loading {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+  }
+
+  .alert {
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+
+    &.alert-info {
+      background-color: rgba(139, 94, 60, 0.1);
+      color: #8B5E3C;
+      border: 1px solid rgba(139, 94, 60, 0.2);
+    }
+
+    &.alert-danger {
+      background-color: #FEE2E2;
+      color: #DC2626;
+      border: 1px solid #FCA5A5;
+    }
+
+    &.alert-success {
+      background-color: #DCFCE7;
+      color: #16A34A;
+      border: 1px solid #86EFAC;
+    }
+  }
+}
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #0066cc;
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 15px;
+  }
+
+  p {
+    color: #666;
+    font-size: 0.9rem;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+
+  .status, .application-number {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+}
+
+.status-label {
+  margin-right: 8px;
+  font-weight: 600;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+
+  &.status-draft {
+    background-color: #e6f7ff;
+    color: #0070cc;
+  }
+
+  &.status-submitted {
+    background-color: #fff7e6;
+    color: #fa8c16;
+  }
+
+  &.status-in-review {
+    background-color: #e6f7ff;
+    color: #1890ff;
+  }
+
+  &.status-returned {
+    background-color: #fff2e8;
+    color: #fa541c;
+  }
+
+  &.status-approved {
+    background-color: #f6ffed;
+    color: #52c41a;
+  }
+
+  &.status-rejected {
+    background-color: #fff1f0;
+    color: #f5222d;
+  }
+}
+
+.detail-row {
+  margin-bottom: 15px;
+  display: flex;
+  flex-wrap: wrap;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .label {
+    width: 200px;
+    font-weight: 600;
+    color: #555;
+    margin-right: 10px;
+  }
+
+  .value {
+    flex: 1;
+    color: #333;
+    word-break: break-word;
+  }
+}
+
+.form-actions {
+  margin-top: 30px;
+  display: flex;
+  justify-content: flex-end;
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+
+    &.btn-primary {
+      background-color: #0066cc;
+      color: white;
+      border: none;
+
+      &:hover:not(:disabled) {
+        background-color: #0056b3;
+      }
+
+      &:disabled {
+        background-color: #b3d1ff;
+        cursor: not-allowed;
+      }
+    }
+
+    .spinner-border {
+      width: 1rem;
+      height: 1rem;
+      border-width: 0.15em;
+      margin-right: 8px;
+    }
+  }
+}
+
+.review-section {
+  border-left: 4px solid #0066cc;
+}
+
+// Responsive styling
+@media (max-width: 768px) {
+  .detail-row {
+    flex-direction: column;
+
+    .label {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+
+    .value {
+      width: 100%;
+    }
+  }
+
+  .status-row {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .status, .application-number {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  }
+}

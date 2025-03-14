@@ -1,0 +1,193 @@
+<div class="review-page-container">
+  <div class="header">
+    <button class="back-button" [routerLink]="['/applications']">
+      <i class="fas fa-arrow-left"></i> {{ 'application.detail.back' | translate }}
+    </button>
+    <h1>{{ 'application.review.lp_specialist_title' | translate }}</h1>
+  </div>
+
+  <!-- Loading indicator -->
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>{{ 'common.loading' | translate }}</p>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="loadingError" class="alert alert-danger">
+    <p>{{ loadingError }}</p>
+    <button class="btn btn-outline-danger" (click)="loadApplication()">
+      {{ 'application.detail.try_again' | translate }}
+    </button>
+  </div>
+
+  <div *ngIf="application && !isLoading" class="review-content">
+    <!-- Application Summary -->
+    <div class="detail-card">
+      <h2 class="section-title">{{ 'application.detail.summary' | translate }}</h2>
+      <div class="detail-content">
+        <div class="status-row">
+          <div class="status">
+            <span class="status-label">{{ 'application.detail.status' | translate }}:</span>
+            <span class="status-badge" [ngClass]="getStatusClass(application.status)">
+              {{ 'application.status.' + getStatusLabel(application.status) | translate }}
+            </span>
+          </div>
+          <div class="application-number">
+            <span class="label">{{ 'application.detail.application_number' | translate }}:</span>
+            <span class="value">{{ application.applicationNumber }}</span>
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <span class="label">{{ 'application.detail.title_field' | translate }}:</span>
+          <span class="value">{{ application.title }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">{{ 'application.detail.submitted_date' | translate }}:</span>
+          <span class="value">{{ application.submittedAt | date:'mediumDate' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Applicant Information -->
+    <div class="detail-card">
+      <h2 class="section-title">{{ 'application.detail.applicant_info' | translate }}</h2>
+      <div class="detail-content">
+        <div class="detail-row">
+          <span class="label">{{ 'application.detail.applicant_name' | translate }}:</span>
+          <span class="value">{{ application.applicant.name }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">{{ 'application.detail.applicant_email' | translate }}:</span>
+          <span class="value">{{ application.applicant.email }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">{{ 'application.detail.applicant_phone' | translate }}:</span>
+          <span class="value">{{ application.applicant.phone }}</span>
+        </div>
+        <div class="detail-row" *ngIf="application.applicant.nationalId">
+          <span class="label">{{ 'application.detail.applicant_national_id' | translate }}:</span>
+          <span class="value">{{ application.applicant.nationalId }}</span>
+        </div>
+        <div class="detail-row" *ngIf="application.applicant.address">
+          <span class="label">{{ 'application.detail.applicant_address' | translate }}:</span>
+          <span class="value">{{ application.applicant.address }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Farm Location Information -->
+    <div class="detail-card">
+      <h2 class="section-title">{{ 'application.detail.farm_location' | translate }}</h2>
+      <div class="detail-content">
+        <div class="detail-row">
+          <span class="label">{{ 'application.detail.farm_address' | translate }}:</span>
+          <span class="value">{{ application.farmLocation.address }}</span>
+        </div>
+        <div class="detail-row" *ngIf="application.farmLocation.size">
+          <span class="label">{{ 'application.detail.farm_size' | translate }}:</span>
+          <span class="value">{{ application.farmLocation.size }} {{ 'application.detail.hectares' | translate }}</span>
+        </div>
+        <div class="detail-row" *ngIf="application.farmLocation.crops">
+          <span class="label">{{ 'application.detail.farm_crops' | translate }}:</span>
+          <span class="value">{{ application.farmLocation.crops.join(', ') }}</span>
+        </div>
+        <div class="detail-row" *ngIf="application.farmLocation.latitude && application.farmLocation.longitude">
+          <span class="label">{{ 'application.detail.farm_coordinates' | translate }}:</span>
+          <span class="value">{{ application.farmLocation.latitude }}, {{ application.farmLocation.longitude }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Specialist Review Form -->
+    <div class="detail-card review-section">
+      <h2 class="section-title">{{ 'application.review.lp_specialist_review_title' | translate }}</h2>
+
+      <div class="detail-content">
+        <div class="alert alert-info">
+          <p>{{ 'application.review.lp_specialist_instructions' | translate }}</p>
+        </div>
+
+        <!-- Alert messages -->
+        <div *ngIf="errorMessage" class="alert alert-danger">
+          <p>{{ errorMessage }}</p>
+        </div>
+        <div *ngIf="successMessage" class="alert alert-success">
+          <p>{{ successMessage }}</p>
+        </div>
+
+        <form [formGroup]="reviewForm">
+          <div class="form-group">
+            <label for="decision">{{ 'application.review.decision' | translate }} *</label>
+            <select
+              id="decision"
+              formControlName="decision"
+              class="form-control"
+              [class.is-invalid]="reviewForm.get('decision').invalid && reviewForm.get('decision').touched"
+            >
+              <option value="APPROVE">{{ 'application.review.lp_specialist_approve' | translate }}</option>
+              <option value="RETURN">{{ 'application.review.lp_specialist_return' | translate }}</option>
+              <option value="REJECT">{{ 'application.review.lp_specialist_reject' | translate }}</option>
+            </select>
+            <div *ngIf="reviewForm.get('decision').invalid && reviewForm.get('decision').touched" class="invalid-feedback">
+              {{ 'application.review.decision_required' | translate }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="comments">{{ 'application.review.comments' | translate }} *</label>
+            <textarea
+              id="comments"
+              formControlName="comments"
+              class="form-control"
+              rows="4"
+              [placeholder]="'application.review.comments_placeholder' | translate"
+              [class.is-invalid]="reviewForm.get('comments').invalid && reviewForm.get('comments').touched"
+            ></textarea>
+            <div *ngIf="reviewForm.get('comments').invalid && reviewForm.get('comments').touched" class="invalid-feedback">
+              {{ 'application.review.comments_required' | translate }}
+            </div>
+          </div>
+
+          <div class="review-actions">
+            <button
+              type="button"
+              class="btn btn-success action-btn"
+              (click)="onAction('APPROVE')"
+              [disabled]="isSubmitting || !reviewForm.get('comments').valid"
+            >
+              <i class="fas fa-check"></i>
+              {{ 'application.review.approve' | translate }}
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-warning action-btn"
+              (click)="onAction('RETURN')"
+              [disabled]="isSubmitting || !reviewForm.get('comments').valid"
+            >
+              <i class="fas fa-undo"></i>
+              {{ 'application.review.return' | translate }}
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-danger action-btn"
+              (click)="onAction('REJECT')"
+              [disabled]="isSubmitting || !reviewForm.get('comments').valid"
+            >
+              <i class="fas fa-times"></i>
+              {{ 'application.review.reject' | translate }}
+            </button>
+          </div>
+
+          <div *ngIf="isSubmitting" class="submit-loading">
+            <div class="spinner-border text-primary" role="status">
+              <span class="sr-only">{{ 'common.loading' | translate }}</span>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

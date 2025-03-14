@@ -1,0 +1,20 @@
+{
+  "AbpAccount": {
+    "DefaultErrorMessage": "An error has occurred!",
+    "Login": "Login",
+    "Password": "Password",
+    "RememberMe": "Remember me",
+    "UserName": "Username"
+  },
+  "AbpIdentity": {
+    "Users": "Users",
+    "Roles": "Roles"
+  },
+  "AbpTenantManagement": {
+    "Tenants": "Tenants"
+  },
+  "Menu": {
+    "Home": "Home",
+    "Administration": "Administration"
+  }
+}

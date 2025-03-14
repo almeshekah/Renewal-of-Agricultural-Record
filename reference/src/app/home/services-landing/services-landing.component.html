@@ -1,0 +1,137 @@
+<div class="services-page">
+  <!-- Minimal Header overlay on banner -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <img src="assets/images/Logo.png" alt="Agricultural Services Logo">
+        </div>
+        <div class="header-actions">
+          <button class="lang-btn">
+            <i class="bi bi-globe"></i>
+            <span>English</span>
+          </button>
+          <!-- <button class="user-profile-btn">
+            <i class="bi bi-person-circle"></i>
+          </button> -->
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Banner Section -->
+  <div class="banner-section">
+    <div class="banner-overlay"></div>
+    <div class="container">
+      <div class="banner-content">
+        <h2>Explore</h2>
+        <h1>Royal Commission for AlUla Services</h1>
+        <p>Explore the services provided by the Royal Commission for AlUla</p>
+
+        <!-- Search Bar -->
+        <!-- <div class="search-container">
+          <div class="search-bar">
+            <span class="search-icon">
+              <i class="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              [(ngModel)]="searchQuery"
+              (input)="applyFilters()"
+              placeholder="Search for a service..."
+              class="search-input">
+          </div>
+        </div> -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="container">
+      <!-- Services Section -->
+      <div class="services-section">
+        <div class="section-title">
+          <h2>Services</h2>
+          <p>Select from our range of agricultural services</p>
+        </div>
+
+        <!-- Category Tabs -->
+        <div class="category-tabs">
+          <button
+            *ngFor="let category of categories"
+            (click)="filterByCategory(category)"
+            [class.active]="selectedCategory === category"
+            class="category-tab">
+            {{ category }}
+          </button>
+        </div>
+
+        <!-- Services Grid -->
+        <div class="services-grid">
+          <div *ngFor="let service of filteredServices" class="service-card" (click)="navigateToService(service.route)">
+            <div class="card-content">
+              <div class="service-icon" [style.background-color]="getIconBackground(service.id)">
+                <i [class]="service.icon"></i>
+              </div>
+              <h3>{{ service.title }}</h3>
+              <p>{{ service.description }}</p>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="filteredServices.length === 0" class="empty-state">
+            <div class="empty-state-icon">
+              <i class="bi bi-search"></i>
+            </div>
+            <h3>No services found</h3>
+            <p>Try adjusting your search or select a different category</p>
+            <button class="reset-btn" (click)="resetFilters()">
+              Reset Filters
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <img src="assets/images/Logo.png" alt="Agricultural Services Logo">
+          <p>© 2025 Agricultural E-Services Portal</p>
+        </div>
+        <div class="footer-links">
+          <div class="link-group">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="#">Home</a></li>
+              <li><a href="#">Services</a></li>
+              <li><a href="#">About Us</a></li>
+              <li><a href="#">Contact</a></li>
+            </ul>
+          </div>
+          <div class="link-group">
+            <h4>Legal</h4>
+            <ul>
+              <li><a href="#">Terms of Service</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Accessibility</a></li>
+            </ul>
+          </div>
+          <div class="link-group">
+            <h4>Connect</h4>
+            <div class="social-links">
+              <a href="#"><i class="bi bi-twitter"></i></a>
+              <a href="#"><i class="bi bi-facebook"></i></a>
+              <a href="#"><i class="bi bi-instagram"></i></a>
+              <a href="#"><i class="bi bi-linkedin"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>

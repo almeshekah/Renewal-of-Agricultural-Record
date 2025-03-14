@@ -1,0 +1,9 @@
+﻿using AgriculturalRecordRenewal.EntityFrameworkCore;
+using Xunit;
+
+namespace AgriculturalRecordRenewal.EntityFrameworkCore;
+
+public class AgriculturalRecordRenewalEntityFrameworkCoreCollectionFixtureBase : ICollectionFixture<AgriculturalRecordRenewalEntityFrameworkCoreFixture>
+{
+
+}

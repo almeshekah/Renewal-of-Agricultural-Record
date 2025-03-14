@@ -1,0 +1,772 @@
+// Variables
+$primary-color: #996B44;
+$primary-dark: #7E5737;
+$primary-light: rgba(153, 107, 68, 0.1);
+$secondary-color: #6C757D;
+$success-color: #28A745;
+$warning-color: #FFC107;
+$danger-color: #DC3545;
+$light-color: #F9F7F4;
+$dark-color: #333333;
+$white: #FFFFFF;
+$border-color: #E8E8E8;
+$input-border: #DFE1E5;
+$shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+$border-radius: 8px;
+$transition: all 0.3s ease;
+
+.application-form-container {
+  background-color: #FAFAFA;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+// Form Header Styles
+.form-header {
+  background-image: url('/assets/images/banner.png');
+  background-size: cover;
+  background-position: center;
+  color: $white;
+  padding: 80px 0 50px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1;
+  }
+
+  .container {
+    position: relative;
+    z-index: 2;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .back-section {
+    margin-bottom: 20px;
+  }
+
+  .back-button {
+    color: $white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    font-size: 16px;
+    opacity: 0.9;
+    transition: $transition;
+
+    i {
+      margin-right: 8px;
+    }
+
+    &:hover {
+      opacity: 1;
+      text-decoration: none;
+    }
+  }
+
+  h1 {
+    font-size: 42px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+    color: #FFFFFF;
+  }
+
+  p {
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 40px;
+    opacity: 0.9;
+    max-width: 700px;
+  }
+}
+
+// Progress Indicator
+.progress-container {
+  margin-top: 40px;
+  overflow: hidden;
+
+  .progress-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin-bottom: 30px;
+
+    &:after {
+      content: '';
+      position: absolute;
+      top: 24px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.3);
+      z-index: 1;
+    }
+  }
+
+  .progress-step {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+
+    .step-number {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 2;
+      transition: $transition;
+    }
+
+    .step-label {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      transition: $transition;
+    }
+
+    &.active {
+      .step-number {
+        background-color: $primary-color;
+        border-color: $white;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .step-label {
+        color: $white;
+        font-weight: 600;
+      }
+    }
+
+    &.completed {
+      .step-number {
+        background-color: $success-color;
+        border-color: $white;
+      }
+    }
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 20px;
+
+    .progress-fill {
+      height: 100%;
+      background: $primary-color;
+      transition: width 0.5s ease;
+    }
+  }
+}
+
+// Form Content
+.form-content {
+  padding: 60px 0;
+
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+}
+
+.form-step {
+  background: $white;
+  border-radius: $border-radius;
+  box-shadow: $shadow;
+  padding: 40px;
+  margin-bottom: 30px;
+
+  .step-header {
+    margin-bottom: 30px;
+
+    h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: $dark-color;
+      margin-bottom: 8px;
+    }
+
+    p {
+      color: $secondary-color;
+      font-size: 16px;
+      margin: 0;
+    }
+  }
+}
+
+// Form Controls
+.form-group {
+  margin-bottom: 24px;
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: $dark-color;
+    font-size: 15px;
+
+    .required {
+      color: $danger-color;
+    }
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid $input-border;
+    border-radius: $border-radius;
+    background-color: $white;
+    font-size: 15px;
+    line-height: 1.5;
+    color: $dark-color;
+    transition: $transition;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba($primary-color, 0.15);
+    }
+
+    &::placeholder {
+      color: #ADB5BD;
+    }
+
+    &.is-invalid {
+      border-color: $danger-color;
+
+      &:focus {
+        box-shadow: 0 0 0 3px rgba($danger-color, 0.15);
+      }
+    }
+
+    &:disabled {
+      background-color: $light-color;
+      opacity: 0.7;
+    }
+  }
+
+  textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%236C757D' d='M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+
+  .error-message {
+    font-size: 13px;
+    color: $danger-color;
+    margin-top: 6px;
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 20px;
+}
+
+// Checkbox styles
+.checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-gap: 12px;
+  margin-top: 5px;
+}
+
+.checkbox-item,
+.checkbox-single {
+  display: flex;
+  align-items: center;
+
+  input[type="checkbox"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 1px solid $input-border;
+    border-radius: 4px;
+    margin-right: 10px;
+    position: relative;
+    cursor: pointer;
+
+    &:checked {
+      background-color: $primary-color;
+      border-color: $primary-color;
+
+      &:after {
+        content: '';
+        position: absolute;
+        width: 5px;
+        height: 10px;
+        border: solid $white;
+        border-width: 0 2px 2px 0;
+        top: 3px;
+        left: 7px;
+        transform: rotate(45deg);
+      }
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba($primary-color, 0.15);
+    }
+  }
+
+  label {
+    margin-bottom: 0;
+    cursor: pointer;
+  }
+}
+
+// File upload styles
+.file-upload {
+  margin-bottom: 15px;
+
+  .upload-area {
+    border: 2px dashed $input-border;
+    border-radius: $border-radius;
+    padding: 25px;
+    text-align: center;
+    background-color: $light-color;
+    cursor: pointer;
+    transition: $transition;
+
+    &:hover {
+      border-color: $primary-color;
+      background-color: rgba($primary-color, 0.05);
+    }
+
+    .upload-icon {
+      font-size: 35px;
+      color: $secondary-color;
+      margin-bottom: 10px;
+    }
+
+    .upload-text {
+      h4 {
+        margin-bottom: 5px;
+        color: $dark-color;
+        font-weight: 500;
+        font-size: 16px;
+      }
+
+      p {
+        color: $secondary-color;
+        font-size: 14px;
+        margin: 0;
+      }
+    }
+  }
+
+  .file-preview {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: $light-color;
+    border-radius: $border-radius;
+    margin-top: 10px;
+
+    .file-icon {
+      background-color: rgba($primary-color, 0.1);
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+
+      i {
+        color: $primary-color;
+        font-size: 20px;
+      }
+    }
+
+    .file-info {
+      flex: 1;
+
+      .file-name {
+        font-weight: 500;
+        color: $dark-color;
+        font-size: 14px;
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 300px;
+      }
+
+      .file-size {
+        color: $secondary-color;
+        font-size: 13px;
+      }
+    }
+
+    .file-actions {
+      .remove-file {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba($danger-color, 0.1);
+        color: $danger-color;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        transition: $transition;
+
+        &:hover {
+          background: $danger-color;
+          color: $white;
+        }
+      }
+    }
+  }
+}
+
+// Form Actions
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 40px;
+
+  .btn {
+    padding: 12px 25px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: $border-radius;
+    border: none;
+    cursor: pointer;
+    transition: $transition;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 150px;
+
+    &:focus {
+      outline: none;
+    }
+
+    &:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    i, .spinner-border {
+      margin-right: 8px;
+    }
+  }
+
+  .btn-primary {
+    background-color: $primary-color;
+    color: $white;
+
+    &:hover {
+      background-color: $primary-dark;
+    }
+  }
+
+  .btn-secondary {
+    background-color: transparent;
+    color: $secondary-color;
+    border: 1px solid $secondary-color;
+
+    &:hover {
+      background-color: $secondary-color;
+      color: $white;
+    }
+  }
+
+  .btn-outline {
+    background-color: transparent;
+    color: $primary-color;
+    border: 1px solid $primary-color;
+
+    &:hover {
+      background-color: $primary-color;
+      color: $white;
+    }
+  }
+}
+
+// Success Modal Styles
+.success-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.success-modal {
+  background-color: $white;
+  border-radius: $border-radius;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  max-width: 500px;
+  width: 100%;
+  padding: 40px;
+  text-align: center;
+  position: relative;
+  animation: slideUp 0.4s ease;
+
+  .close-modal {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: $secondary-color;
+    font-size: 20px;
+    transition: $transition;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: $dark-color;
+    }
+  }
+}
+
+.success-icon {
+  margin-bottom: 25px;
+
+  i {
+    font-size: 80px;
+    color: $success-color;
+    filter: drop-shadow(0 4px 6px rgba(40, 167, 69, 0.25));
+  }
+}
+
+.success-modal h2 {
+  color: $dark-color;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.success-modal p {
+  color: $secondary-color;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.reference-number {
+  background-color: $light-color;
+  padding: 16px;
+  border-radius: $border-radius;
+  font-size: 15px;
+  margin-bottom: 30px;
+
+  strong {
+    color: $primary-color;
+    font-weight: 700;
+  }
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+
+  .btn {
+    min-width: 160px;
+    padding: 12px 20px;
+
+    &.btn-primary {
+      background-color: $primary-color;
+      color: $white;
+
+      &:hover {
+        background-color: darken($primary-color, 5%);
+      }
+    }
+
+    &.btn-outline {
+      background-color: transparent;
+      color: $primary-color;
+      border: 1px solid $primary-color;
+
+      &:hover {
+        background-color: rgba($primary-color, 0.05);
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+// Responsive Styles
+@media (max-width: 992px) {
+  .form-header {
+    padding: 60px 0 40px;
+
+    h1 {
+      font-size: 36px;
+    }
+
+    p {
+      font-size: 16px;
+    }
+  }
+
+  .progress-container .progress-step .step-label {
+    font-size: 13px;
+  }
+
+  .form-step {
+    padding: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    grid-gap: 15px;
+  }
+
+  .progress-container .progress-step .step-label {
+    display: none;
+  }
+
+  .form-step {
+    padding: 25px 20px;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    gap: 15px;
+
+    .btn {
+      width: 100%;
+    }
+  }
+
+  .success-modal {
+    padding: 30px 25px;
+    max-width: 90%;
+  }
+
+  .success-icon i {
+    font-size: 65px;
+  }
+
+  .success-modal h2 {
+    font-size: 22px;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+    gap: 15px;
+
+    .btn {
+      width: 100%;
+      margin: 0;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .form-header {
+    padding: 50px 0 35px;
+
+    h1 {
+      font-size: 28px;
+    }
+
+    p {
+      font-size: 15px;
+      margin-bottom: 30px;
+    }
+  }
+
+  .progress-container .progress-step .step-number {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .checkbox-group {
+    grid-template-columns: 1fr;
+  }
+
+  .success-modal {
+    padding: 25px 20px;
+  }
+
+  .success-icon {
+    margin-bottom: 20px;
+
+    i {
+      font-size: 55px;
+    }
+  }
+
+  .success-modal h2 {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
+  .success-modal p {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .reference-number {
+    font-size: 14px;
+    padding: 12px;
+    margin-bottom: 24px;
+  }
+}

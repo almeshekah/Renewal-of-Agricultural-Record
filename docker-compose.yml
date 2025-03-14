@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: agricultural-record-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: AgriculturalRecordRenewalDb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - agricultural-network
+
+  camunda:
+    image: camunda/camunda-bpm-platform:7.16.0
+    container_name: agricultural-record-workflow
+    environment:
+      - DB_DRIVER=org.h2.Driver
+      - DB_URL=jdbc:h2:mem:camunda;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+      - WAIT_FOR=postgres:5432
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres
+    networks:
+      - agricultural-network
+
+networks:
+  agricultural-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

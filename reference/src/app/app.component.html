@@ -1,0 +1,6 @@
+<div class="app-container">
+  <app-nav *ngIf="isLoggedIn && !isLoginPage && !isServicesPage"></app-nav>
+  <main class="content-container" [ngClass]="{'full-width': !isLoggedIn || isLoginPage || isServicesPage}">
+    <router-outlet></router-outlet>
+  </main>
+</div>

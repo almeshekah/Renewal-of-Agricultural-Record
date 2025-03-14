@@ -1,0 +1,359 @@
+// AlUla color theme
+$alula-beige: #D3BEA1;  // Sand/beige color from the image
+$alula-gold: #C9A863;
+$alula-text: #333333;
+$alula-light-text: #666666;
+$alula-background: #F8F8F8;
+$alula-border: #E0E0E0;
+$alula-white: #FFFFFF;
+$alula-error: #D32F2F;
+$alula-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+.login-page {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+// Left side with beige background
+.image-container {
+  flex: 1;
+  background-color: $alula-beige;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // padding: 30px;
+}
+
+.logo-container {
+  max-width: 100%;
+
+  .alula-thumbnail {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: $alula-shadow;
+  }
+}
+
+// Right side with form
+.form-container {
+  flex: 1;
+  background-color: $alula-white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.form-content {
+  width: 100%;
+  max-width: 450px;
+  padding: 40px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  color: $alula-text;
+  text-decoration: none;
+  font-size: 14px;
+  margin-bottom: 24px;
+
+  i {
+    margin-right: 8px;
+    font-size: 12px;
+  }
+
+  &:hover {
+    color: $alula-gold;
+  }
+}
+
+.form-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: $alula-text;
+  margin: 0 0 8px 0;
+}
+
+.form-subtitle {
+  color: $alula-light-text;
+  font-size: 14px;
+  margin: 0 0 32px 0;
+}
+
+form {
+  .form-group {
+    margin-bottom: 24px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: $alula-text;
+    font-size: 14px;
+  }
+
+  .input-with-icon {
+    position: relative;
+
+    .icon-left {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: $alula-light-text;
+    }
+
+    .icon-right {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: $alula-light-text;
+      cursor: pointer;
+
+      &:hover {
+        color: $alula-text;
+      }
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 16px 12px 46px;
+      border: 1px solid $alula-border;
+      border-radius: 4px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+
+      &:focus {
+        outline: none;
+        border-color: $alula-beige;
+        box-shadow: 0 0 0 3px rgba($alula-beige, 0.2);
+      }
+
+      &.is-invalid {
+        border-color: $alula-error;
+      }
+    }
+  }
+
+  .error-message {
+    color: $alula-error;
+    font-size: 12px;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+
+    i {
+      margin-right: 6px;
+      font-size: 12px;
+    }
+  }
+
+  .form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+
+      input[type="checkbox"] {
+        margin-right: 8px;
+        cursor: pointer;
+      }
+
+      label {
+        font-size: 14px;
+        font-weight: normal;
+        margin-bottom: 0;
+        cursor: pointer;
+      }
+    }
+
+    .forgot-password {
+      font-size: 14px;
+      color: $alula-text;
+      text-decoration: none;
+
+      &:hover {
+        color: $alula-beige;
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .error-alert {
+    background-color: rgba($alula-error, 0.1);
+    color: $alula-error;
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+
+    i {
+      margin-right: 8px;
+      font-size: 16px;
+    }
+  }
+
+  .sign-in-button {
+    width: 100%;
+    padding: 12px 16px;
+    background-color: $alula-beige;
+    color: $alula-white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 24px;
+
+    &:hover {
+      background-color: darken($alula-beige, 7%);
+    }
+
+    &:disabled {
+      background-color: lighten($alula-beige, 10%);
+      cursor: not-allowed;
+    }
+
+    .spinner-border {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .create-account {
+    text-align: center;
+    font-size: 14px;
+    color: $alula-light-text;
+
+    a {
+      color: $alula-beige;
+      text-decoration: none;
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.test-accounts-info {
+  background-color: rgba($alula-beige, 0.1);
+  border: 1px solid $alula-border;
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+
+  h4 {
+    font-size: 16px;
+    color: $alula-text;
+    margin: 0 0 8px 0;
+    font-weight: 600;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 20px;
+
+    li {
+      font-size: 14px;
+      color: $alula-light-text;
+      margin-bottom: 4px;
+
+      strong {
+        color: $alula-text;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .quick-login {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba($alula-border, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    label {
+      font-size: 14px;
+      font-weight: 500;
+      color: $alula-text;
+      margin: 0;
+    }
+
+    select {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid $alula-border;
+      border-radius: 4px;
+      font-size: 14px;
+      color: $alula-text;
+      background-color: $alula-white;
+
+      &:focus {
+        outline: none;
+        border-color: $alula-beige;
+        box-shadow: 0 0 0 2px rgba($alula-beige, 0.2);
+      }
+
+      option {
+        padding: 8px;
+      }
+    }
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+  .login-page {
+    flex-direction: column;
+  }
+
+  .image-container {
+    height: auto;
+    min-height: 100px;
+    justify-content: center;
+  }
+
+  .form-container {
+    padding: 40px 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .form-content {
+    padding: 10px;
+  }
+
+  .form-title {
+    font-size: 24px;
+  }
+
+  .form-options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .forgot-password {
+    align-self: flex-end;
+  }
+}

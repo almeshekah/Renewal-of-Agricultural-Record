@@ -1,0 +1,206 @@
+<div class="applications-page">
+  <!-- Use the shared navigation component -->
+  <app-nav></app-nav>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Header -->
+    <!-- Header Section -->
+    <div class="main-header">
+      <h1 class="page-title">{{ 'applications.title' | translate }}</h1>
+      <div class="header-end">
+        <div class="search-bar">
+          <i class="bi bi-search search-icon"></i>
+          <input
+            type="text"
+            [(ngModel)]="searchQuery"
+            (input)="applyFilters()"
+            placeholder="{{ 'applications.searchPlaceholder' | translate }}"
+            class="search-input">
+        </div>
+        <div class="notifications">
+          <button class="notification-btn">
+            <i class="bi bi-bell"></i>
+            <span class="notification-badge">3</span>
+          </button>
+        </div>
+        <div class="language-selector">
+          <button class="lang-btn" (click)="switchLanguage()">
+            {{ currentLang === 'en' ? 'AR' : 'EN' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Controls -->
+    <div class="filter-controls">
+      <div class="filter-section">
+        <div class="filter-group">
+          <label>{{ 'applications.filter.status' | translate }}</label>
+          <select [(ngModel)]="selectedStatus" (change)="applyFilters()">
+            <option value="ALL">{{ 'common.all' | translate }}</option>
+            <option value="DRAFT">{{ 'applications.status_values.draft' | translate }}</option>
+            <option value="SUBMITTED">{{ 'applications.status_values.submitted' | translate }}</option>
+            <option value="UNDER_REVIEW_LP">{{ 'applications.status_values.under_review_lp' | translate }}</option>
+            <option value="UNDER_REVIEW_MANAGER">{{ 'applications.status_values.under_review_manager' | translate }}</option>
+            <option value="UNDER_REVIEW_COO">{{ 'applications.status_values.under_review_coo' | translate }}</option>
+            <option value="APPROVED">{{ 'applications.status_values.approved' | translate }}</option>
+            <option value="REJECTED">{{ 'applications.status_values.rejected' | translate }}</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>{{ 'applications.filter.date' | translate }}</label>
+          <select [(ngModel)]="selectedDateRange" (change)="applyFilters()">
+            <option value="">{{ 'common.all' | translate }}</option>
+            <option value="TODAY">{{ 'common.today' | translate }}</option>
+            <option value="THIS_WEEK">{{ 'common.thisWeek' | translate }}</option>
+            <option value="THIS_MONTH">{{ 'common.thisMonth' | translate }}</option>
+            <option value="THIS_YEAR">{{ 'common.thisYear' | translate }}</option>
+          </select>
+        </div>
+        <div class="filter-buttons">
+          <!-- Manager Review Filter -->
+          <button
+            [class.active]="showManagerReviewOnly"
+            class="filter-btn manager-review-btn"
+            (click)="filterManagerReviewItems()">
+            <i class="bi bi-person-check"></i>
+            Manager Review
+          </button>
+
+          <!-- COO Review Filter -->
+          <button
+            [class.active]="showCOOReviewOnly"
+            class="filter-btn coo-review-btn"
+            (click)="filterCOOReviewItems()">
+            <i class="bi bi-person-badge"></i>
+            COO Review
+          </button>
+        </div>
+      </div>
+      <div class="action-section">
+        <button class="create-application-btn" (click)="createApplication()">
+          <i class="bi bi-plus-lg"></i>
+          {{ 'applications.create_new' | translate }}
+        </button>
+
+        <!-- <a [routerLink]="['/applications/workflow-test']" class="workflow-test-btn">
+          <i class="bi bi-diagram-3"></i>
+          Test Workflow
+        </a> -->
+      </div>
+    </div>
+
+    <!-- If you have the reviewer guide message -->
+    <div *ngIf="currentUserRole !== 'applicant'" class="reviewer-guide-message">
+      <div class="message-content">
+        <h3>{{ 'applications.reviewer_guidance.title' | translate }}</h3>
+        <p>{{ 'applications.reviewer_guidance.message' | translate }}</p>
+      </div>
+    </div>
+
+    <!-- Applications Table -->
+    <div class="applications-container">
+      <div class="table-header">
+        <div class="table-info">
+          <span>{{ 'applications.showing' | translate }} <strong>{{ filteredApplications.length }}</strong> {{ 'applications.of' | translate }} <strong>{{ applications.length }}</strong> {{ 'applications.applications' | translate }}</span>
+          <span *ngIf="currentUserRole !== 'applicant' && currentUserRole !== 'Guest'" class="role-filter-badge">
+            <i class="bi bi-funnel-fill"></i>
+            Showing {{ getRoleLabel() }} applications
+          </span>
+        </div>
+      </div>
+
+      <div class="applications-table">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-id">{{ 'applications.columns.id' | translate }}</th>
+              <th class="col-title">{{ 'applications.columns.title' | translate }}</th>
+              <th class="col-applicant">{{ 'applications.columns.applicant' | translate }}</th>
+              <th class="col-date">{{ 'applications.columns.submission_date' | translate }}</th>
+              <th class="col-status">{{ 'applications.columns.status' | translate }}</th>
+              <th class="col-actions">{{ 'applications.columns.actions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let application of paginatedApplications"
+                (click)="viewApplication(application)">
+              <td class="col-id">{{ application.id }}</td>
+              <td class="col-title" [title]="application.title">{{ application.title }}</td>
+              <td class="col-applicant">
+                <div class="applicant-info">
+                  <div class="applicant-avatar">
+                    <span>{{ application.applicant.name.charAt(0).toUpperCase() }}</span>
+                  </div>
+                  <div class="applicant-details">
+                    <p class="applicant-name">{{ application.applicant.name }}</p>
+                    <p class="applicant-email">{{ application.applicant.email }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="col-date">{{ application.submissionDate | date:'mediumDate' }}</td>
+              <td class="col-status">
+                <span [class]="'status-badge ' + getStatusClass(application.status)">
+                  {{ getStatusDisplayText(application.status) }}
+                </span>
+              </td>
+              <td class="col-actions">
+                <div class="actions-container">
+                  <button class="action-btn view-btn" (click)="viewApplication(application); $event.stopPropagation()">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                  <button class="action-btn more-btn" (click)="$event.stopPropagation()">
+                    <i class="bi bi-three-dots-vertical"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="filteredApplications.length === 0" class="no-data-row">
+              <td colspan="6">
+                <div class="empty-state">
+                  <i class="bi bi-inbox empty-icon"></i>
+                  <h3>{{ 'applications.no_applications' | translate }}</h3>
+                  <p>{{ 'applications.no_applications_message' | translate }}</p>
+                  <button class="create-btn" (click)="createApplication()">
+                    <i class="bi bi-plus-lg"></i> {{ 'applications.create_new' | translate }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Updated Pagination -->
+      <div class="pagination" *ngIf="filteredApplications.length > 0">
+        <div class="pagination-info">
+          {{ 'pagination.showing' | translate }} <span>{{ (currentPage - 1) * pageSize + 1 }}-{{ Math.min(currentPage * pageSize, totalItems) }}</span> {{ 'pagination.of' | translate }} <span>{{ totalItems }}</span> {{ 'applications.applications' | translate }}
+        </div>
+
+        <div class="pagination-controls">
+          <button class="pagination-btn" (click)="previousPage()" [disabled]="currentPage === 1">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+
+          <button class="pagination-btn"
+                  *ngFor="let page of [].constructor(totalPages > 5 ? 5 : totalPages); let i = index"
+                  [ngClass]="{'active': currentPage === i + 1}"
+                  (click)="goToPage(i + 1)">
+            {{ i + 1 }}
+          </button>
+
+          <button class="pagination-btn" *ngIf="totalPages > 5">...</button>
+
+          <button class="pagination-btn" *ngIf="totalPages > 5" (click)="goToPage(totalPages)">
+            {{ totalPages }}
+          </button>
+
+          <button class="pagination-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

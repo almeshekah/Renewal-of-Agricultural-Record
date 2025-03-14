@@ -1,0 +1,19 @@
+{
+  "auth": {
+    "login": {
+      "title": "تسجيل الدخول",
+      "subtitle": "يرجى ملء المعلومات التالية لتسجيل الدخول",
+      "username": "رقم الهوية / الإقامة",
+      "usernamePlaceholder": "أدخل رقم الهوية / الإقامة",
+      "usernameRequired": "رقم الهوية / الإقامة مطلوب",
+      "password": "كلمة المرور",
+      "passwordRequired": "كلمة المرور مطلوبة",
+      "rememberMe": "تذكرني",
+      "forgotPassword": "نسيت كلمة المرور؟",
+      "signIn": "تسجيل الدخول",
+      "noAccount": "ليس لديك حساب؟",
+      "createAccount": "إنشاء حساب",
+      "invalidCredentials": "اسم المستخدم أو كلمة المرور غير صحيحة"
+    }
+  }
+}

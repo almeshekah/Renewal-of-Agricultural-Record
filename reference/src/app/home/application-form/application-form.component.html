@@ -1,0 +1,399 @@
+<div class="application-form-container">
+  <!-- Form Header with Banner Background -->
+  <div class="form-header">
+    <div class="container">
+      <div class="back-section">
+        <a [routerLink]="['/home/services']" class="back-button">
+          <i class="bi bi-arrow-left"></i> Back to Services
+        </a>
+      </div>
+      <h1>Farm Renewal Application</h1>
+      <p>Please complete all required information to submit your farm renewal application</p>
+
+      <!-- Progress Indicator -->
+      <div class="progress-container">
+        <div class="progress-steps">
+          <div
+            *ngFor="let step of [1, 2, 3, 4]; let i = index"
+            class="progress-step"
+            [ngClass]="{
+              'completed': currentStep > i + 1,
+              'active': currentStep === i + 1
+            }">
+            <div class="step-number">{{ i + 1 }}</div>
+            <div class="step-label">
+              <span *ngIf="i === 0">Personal Information</span>
+              <span *ngIf="i === 1">Farm Details</span>
+              <span *ngIf="i === 2">License Information</span>
+              <span *ngIf="i === 3">Documents & Submit</span>
+            </div>
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width]="((currentStep - 1) / (totalSteps - 1)) * 100 + '%'"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-content">
+    <div class="container">
+      <form [formGroup]="applicationForm" (ngSubmit)="onSubmit()">
+
+        <!-- Step 1: Personal Information -->
+        <div class="form-step" *ngIf="currentStep === 1">
+          <div formGroupName="personalInfo">
+            <div class="step-header">
+              <h2>Personal Information</h2>
+              <p>Provide your contact and identification details</p>
+            </div>
+
+            <div class="form-group">
+              <label for="fullName">Full Name <span class="required">*</span></label>
+              <input
+                type="text"
+                id="fullName"
+                formControlName="fullName"
+                class="form-control"
+                placeholder="Enter your full name"
+                [ngClass]="{'is-invalid': shouldShowError('fullName', 'personalInfo')}">
+              <div class="error-message" *ngIf="shouldShowError('fullName', 'personalInfo')">
+                Full name is required
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="nationalId">National ID <span class="required">*</span></label>
+              <input
+                type="text"
+                id="nationalId"
+                formControlName="nationalId"
+                class="form-control"
+                placeholder="Enter 10-digit national ID"
+                [ngClass]="{'is-invalid': shouldShowError('nationalId', 'personalInfo')}">
+              <div class="error-message" *ngIf="shouldShowError('nationalId', 'personalInfo')">
+                Valid national ID is required (10 digits)
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="email">Email <span class="required">*</span></label>
+                <input
+                  type="email"
+                  id="email"
+                  formControlName="email"
+                  class="form-control"
+                  placeholder="example@domain.com"
+                  [ngClass]="{'is-invalid': shouldShowError('email', 'personalInfo')}">
+                <div class="error-message" *ngIf="shouldShowError('email', 'personalInfo')">
+                  Valid email address is required
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="mobile">Mobile Number <span class="required">*</span></label>
+                <input
+                  type="tel"
+                  id="mobile"
+                  formControlName="mobile"
+                  class="form-control"
+                  placeholder="05xxxxxxxx or 9665xxxxxxx"
+                  [ngClass]="{'is-invalid': shouldShowError('mobile', 'personalInfo')}">
+                <div class="error-message" *ngIf="shouldShowError('mobile', 'personalInfo')">
+                  Valid Saudi mobile number is required
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="address">Address <span class="required">*</span></label>
+              <textarea
+                id="address"
+                formControlName="address"
+                class="form-control"
+                placeholder="Enter your complete address"
+                rows="3"
+                [ngClass]="{'is-invalid': shouldShowError('address', 'personalInfo')}"></textarea>
+              <div class="error-message" *ngIf="shouldShowError('address', 'personalInfo')">
+                Address is required
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Farm Information -->
+        <div class="form-step" *ngIf="currentStep === 2">
+          <div formGroupName="farmInfo">
+            <div class="step-header">
+              <h2>Farm Details</h2>
+              <p>Provide information about your farm</p>
+            </div>
+
+            <div class="form-group">
+              <label for="location">Farm Location <span class="required">*</span></label>
+              <textarea
+                id="location"
+                formControlName="location"
+                class="form-control"
+                placeholder="Detailed location description or coordinates"
+                rows="2"
+                [ngClass]="{'is-invalid': shouldShowError('location', 'farmInfo')}"></textarea>
+              <div class="error-message" *ngIf="shouldShowError('location', 'farmInfo')">
+                Farm location is required
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="farmSize">Farm Size (in hectares) <span class="required">*</span></label>
+              <input
+                type="number"
+                id="farmSize"
+                formControlName="farmSize"
+                class="form-control"
+                placeholder="Enter farm size in hectares"
+                min="1"
+                [ngClass]="{'is-invalid': shouldShowError('farmSize', 'farmInfo')}">
+              <div class="error-message" *ngIf="shouldShowError('farmSize', 'farmInfo')">
+                Valid farm size is required (minimum 1 hectare)
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Crop Types <span class="required">*</span></label>
+              <div class="checkbox-group">
+                <div *ngFor="let crop of cropsTypes" class="checkbox-item">
+                  <input
+                    type="checkbox"
+                    [id]="crop.id"
+                    [value]="crop.id"
+                    (change)="onCropSelected(crop.id, $event)">
+                  <label [for]="crop.id">{{ crop.label }}</label>
+                </div>
+              </div>
+              <div class="error-message" *ngIf="applicationForm.get('farmInfo')?.get('cropTypes')?.touched &&
+                  applicationForm.get('farmInfo')?.get('cropTypes')?.hasError('required')">
+                Select at least one crop type
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="checkbox-single">
+                <input
+                  type="checkbox"
+                  id="hasIrrigationSystem"
+                  formControlName="hasIrrigationSystem">
+                <label for="hasIrrigationSystem">Farm has irrigation system</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: License Information -->
+        <div class="form-step" *ngIf="currentStep === 3">
+          <div formGroupName="licenseInfo">
+            <div class="step-header">
+              <h2>License Information</h2>
+              <p>Provide information about previous agricultural licenses</p>
+            </div>
+
+            <div class="form-group">
+              <div class="checkbox-single">
+                <input
+                  type="checkbox"
+                  id="hasPreviousLicense"
+                  formControlName="hasPreviousLicense">
+                <label for="hasPreviousLicense">I have a previous agricultural license</label>
+              </div>
+            </div>
+
+            <div *ngIf="applicationForm.get('licenseInfo.hasPreviousLicense').value">
+              <div class="form-group">
+                <label for="licenseNumber">Previous License Number <span class="required">*</span></label>
+                <input
+                  type="text"
+                  id="licenseNumber"
+                  formControlName="licenseNumber"
+                  class="form-control"
+                  placeholder="Enter your previous license number"
+                  [ngClass]="{'is-invalid': shouldShowError('licenseNumber', 'licenseInfo')}">
+                <div class="error-message" *ngIf="shouldShowError('licenseNumber', 'licenseInfo')">
+                  License number is required
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="issueDate">Issue Date <span class="required">*</span></label>
+                  <input
+                    type="date"
+                    id="issueDate"
+                    formControlName="issueDate"
+                    class="form-control"
+                    [ngClass]="{'is-invalid': shouldShowError('issueDate', 'licenseInfo')}">
+                  <div class="error-message" *ngIf="shouldShowError('issueDate', 'licenseInfo')">
+                    Issue date is required
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="expiryDate">Expiry Date <span class="required">*</span></label>
+                  <input
+                    type="date"
+                    id="expiryDate"
+                    formControlName="expiryDate"
+                    class="form-control"
+                    [ngClass]="{'is-invalid': shouldShowError('expiryDate', 'licenseInfo')}">
+                  <div class="error-message" *ngIf="shouldShowError('expiryDate', 'licenseInfo')">
+                    Expiry date is required
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="activityType">Agricultural Activity Type <span class="required">*</span></label>
+              <select
+                id="activityType"
+                formControlName="activityType"
+                class="form-control"
+                [ngClass]="{'is-invalid': shouldShowError('activityType', 'licenseInfo')}">
+                <option value="" disabled selected>Select activity type</option>
+                <option value="crops">Crop Farming</option>
+                <option value="livestock">Livestock Farming</option>
+                <option value="mixed">Mixed Farming</option>
+                <option value="specializedCrops">Specialized Crops</option>
+                <option value="other">Other</option>
+              </select>
+              <div class="error-message" *ngIf="shouldShowError('activityType', 'licenseInfo')">
+                Activity type is required
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="notes">Additional Notes</label>
+              <textarea
+                id="notes"
+                formControlName="notes"
+                class="form-control"
+                placeholder="Any additional information regarding your license"
+                rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Documents Upload & Submit -->
+        <div class="form-step" *ngIf="currentStep === 4">
+          <div formGroupName="documents">
+            <div class="step-header">
+              <h2>Required Documents</h2>
+              <p>Upload all necessary documents to complete your application</p>
+            </div>
+
+            <div class="form-group" *ngFor="let docType of documentTypes">
+              <label>{{ docType.label }} <span class="required">*</span></label>
+              <div class="file-upload">
+                <div class="upload-area" (click)="triggerFileInput(docType.id)">
+                  <div class="upload-icon">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                  </div>
+                  <div class="upload-text">
+                    <h4>Click to upload file</h4>
+                    <p>PDF, JPG or PNG (Max size: 5MB)</p>
+                  </div>
+                  <input
+                    type="file"
+                    [id]="'file-' + docType.id"
+                    hidden
+                    (change)="onFileSelected($event, docType.id)">
+                </div>
+                <div class="file-preview" *ngIf="getFileName(docType.id)">
+                  <div class="file-icon">
+                    <i class="bi bi-file-earmark-text"></i>
+                  </div>
+                  <div class="file-info">
+                    <div class="file-name">{{ getFileName(docType.id) }}</div>
+                    <div class="file-size">{{ getFileSize(docType.id) }}</div>
+                  </div>
+                  <div class="file-actions">
+                    <button type="button" class="remove-file" (click)="removeFile(docType.id)">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="error-message" *ngIf="shouldShowDocumentError(docType.id)">
+                Please upload a {{ docType.label.toLowerCase() }} document
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="checkbox-single">
+                <input
+                  type="checkbox"
+                  id="termsAgreed"
+                  formControlName="termsAgreed">
+                <label for="termsAgreed">I confirm that all provided information is accurate and I agree to the <a href="#" target="_blank">Terms and Conditions</a></label>
+              </div>
+              <div class="error-message" *ngIf="applicationForm.get('documents.termsAgreed').touched && !applicationForm.get('documents.termsAgreed').value">
+                You must accept the terms and conditions to proceed
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Navigation Buttons -->
+        <div class="form-actions">
+          <button
+            *ngIf="currentStep > 1"
+            type="button"
+            class="btn btn-outline"
+            (click)="prevStep()">
+            <i class="bi bi-arrow-left"></i> Previous
+          </button>
+          <div *ngIf="currentStep === 1"></div> <!-- Empty div for flex spacing on first step -->
+
+          <button
+            *ngIf="currentStep < totalSteps"
+            type="button"
+            class="btn btn-primary"
+            (click)="nextStep()">
+            Next <i class="bi bi-arrow-right"></i>
+          </button>
+
+          <button
+            *ngIf="currentStep === totalSteps"
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="isLoading || !isFormValid">
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm"></span>
+            <span *ngIf="!isLoading">Submit Application</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="success-modal-overlay" *ngIf="formSubmitted">
+    <div class="success-modal">
+      <button class="close-modal" (click)="closeModal()">
+        <i class="bi bi-x"></i>
+      </button>
+      <div class="success-icon">
+        <i class="bi bi-check-circle-fill"></i>
+      </div>
+      <h2>Application Submitted Successfully</h2>
+      <p>Your farm renewal application has been submitted successfully. You will receive a confirmation email shortly.</p>
+      <p class="reference-number">Reference Number: <strong>{{ getApplicationNumber() }}</strong></p>
+      <div class="modal-actions">
+        <button class="btn btn-outline" (click)="goToServices()">
+          Go to Services
+        </button>
+        <button class="btn btn-primary" (click)="goToLogin()">
+          Go to Login
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

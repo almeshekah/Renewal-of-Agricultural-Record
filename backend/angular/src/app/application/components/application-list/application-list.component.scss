@@ -1,0 +1,355 @@
+// Variables
+$primary: #0056b3;
+$primary-light: #e6f0ff;
+$primary-dark: #003d82;
+$secondary: #6c757d;
+$success: #28a745;
+$warning: #ffc107;
+$danger: #dc3545;
+$light: #f8f9fa;
+$dark: #343a40;
+$white: #ffffff;
+$gray-100: #f8f9fa;
+$gray-200: #e9ecef;
+$gray-300: #dee2e6;
+$gray-400: #ced4da;
+$gray-500: #adb5bd;
+$gray-600: #6c757d;
+$gray-700: #495057;
+$gray-800: #343a40;
+$gray-900: #212529;
+
+// Status colors
+$status-draft: #6c757d;
+$status-pending: #ffc107;
+$status-approved: #28a745;
+$status-rejected: #dc3545;
+
+// Layout variables
+$sidebar-width: 280px;
+$header-height: 64px;
+$content-padding: 24px;
+
+// Mixins
+@mixin flex($direction: row, $justify: flex-start, $align: stretch) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: $justify;
+  align-items: $align;
+}
+
+@mixin button-reset {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  outline: none;
+}
+
+// Main container
+.applications-page {
+  padding: $content-padding;
+  background-color: $gray-100;
+  min-height: 100vh;
+  margin-left: $sidebar-width;
+}
+
+// Header
+.applications-header {
+  @include flex(row, space-between, center);
+  margin-bottom: 24px;
+
+  .header-left {
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: $gray-800;
+      margin: 0 0 8px 0;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: $gray-600;
+      margin: 0;
+    }
+  }
+
+  .header-right {
+    .btn-primary {
+      background-color: $primary;
+      color: $white;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: $primary-dark;
+      }
+
+      i {
+        margin-right: 8px;
+      }
+    }
+  }
+}
+
+// Filters
+.filters-container {
+  background-color: $white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+  margin-bottom: 24px;
+  @include flex(column, flex-start, stretch);
+  gap: 16px;
+
+  @media (min-width: 768px) {
+    @include flex(row, space-between, center);
+  }
+
+  .search-box {
+    position: relative;
+    flex: 1;
+
+    i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: $gray-500;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 10px 10px 36px;
+      border: 1px solid $gray-300;
+      border-radius: 4px;
+      font-size: 14px;
+
+      &:focus {
+        outline: none;
+        border-color: $primary;
+        box-shadow: 0 0 0 2px rgba($primary, 0.2);
+      }
+    }
+  }
+
+  .filter-options {
+    @include flex(column, flex-start, stretch);
+    gap: 12px;
+
+    @media (min-width: 768px) {
+      @include flex(row, flex-end, center);
+      gap: 16px;
+    }
+
+    .filter-group {
+      @include flex(row, flex-start, center);
+      gap: 8px;
+
+      label {
+        font-size: 14px;
+        color: $gray-700;
+        white-space: nowrap;
+      }
+
+      select {
+        padding: 8px 12px;
+        border: 1px solid $gray-300;
+        border-radius: 4px;
+        background-color: $white;
+        font-size: 14px;
+        min-width: 150px;
+
+        &:focus {
+          outline: none;
+          border-color: $primary;
+          box-shadow: 0 0 0 2px rgba($primary, 0.2);
+        }
+      }
+    }
+  }
+}
+
+// Applications Table
+.applications-table {
+  background-color: $white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-bottom: 24px;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th, td {
+      padding: 16px;
+      text-align: left;
+      border-bottom: 1px solid $gray-200;
+    }
+
+    th {
+      background-color: $gray-100;
+      font-weight: 600;
+      font-size: 14px;
+      color: $gray-700;
+    }
+
+    td {
+      font-size: 14px;
+      color: $gray-800;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: $gray-100;
+    }
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+    min-width: 80px;
+
+    &.status-draft {
+      background-color: $gray-200;
+      color: $gray-700;
+    }
+
+    &.status-pending {
+      background-color: rgba($warning, 0.2);
+      color: darken($warning, 25%);
+    }
+
+    &.status-approved {
+      background-color: rgba($success, 0.2);
+      color: darken($success, 10%);
+    }
+
+    &.status-rejected {
+      background-color: rgba($danger, 0.2);
+      color: darken($danger, 10%);
+    }
+  }
+
+  .actions-cell {
+    @include flex(row, flex-start, center);
+    gap: 8px;
+
+    .btn-icon {
+      @include button-reset;
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      @include flex(row, center, center);
+      background-color: $gray-100;
+      color: $gray-700;
+      transition: all 0.2s;
+
+      &:hover {
+        background-color: $gray-200;
+      }
+
+      &.btn-delete:hover {
+        background-color: rgba($danger, 0.1);
+        color: $danger;
+      }
+
+      &.btn-review:hover {
+        background-color: rgba($primary, 0.1);
+        color: $primary;
+      }
+    }
+  }
+
+  // Empty state
+  .empty-state {
+    padding: 48px 24px;
+    text-align: center;
+
+    .empty-icon {
+      font-size: 48px;
+      color: $gray-400;
+      margin-bottom: 16px;
+    }
+
+    h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: $gray-700;
+      margin: 0 0 8px 0;
+    }
+
+    p {
+      font-size: 14px;
+      color: $gray-600;
+      margin: 0 0 16px 0;
+    }
+
+    .btn-secondary {
+      background-color: $gray-200;
+      color: $gray-700;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        background-color: $gray-300;
+      }
+    }
+  }
+}
+
+// Pagination
+.pagination {
+  @include flex(row, center, center);
+  gap: 4px;
+  margin-top: 24px;
+
+  .page-btn {
+    @include button-reset;
+    min-width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    @include flex(row, center, center);
+    background-color: $white;
+    color: $gray-700;
+    font-size: 14px;
+    border: 1px solid $gray-300;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      background-color: $gray-100;
+      border-color: $gray-400;
+    }
+
+    &.active {
+      background-color: $primary;
+      color: $white;
+      border-color: $primary;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}

@@ -1,0 +1,134 @@
+<!-- Main Container -->
+<div class="services-page">
+  <!-- Minimal Header overlay on banner -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <img src="assets/images/Logo.png" alt="Agricultural Services Logo">
+        </div>
+        <div class="header-actions">
+          <button class="lang-btn">
+            <i class="bi bi-globe"></i>
+            <span>English</span>
+          </button>
+          <!-- <button class="user-profile-btn">
+            <i class="bi bi-person-circle"></i>
+          </button> -->
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Banner Section -->
+  <div class="banner-section">
+    <div class="banner-overlay"></div>
+    <div class="container">
+      <div class="banner-content">
+        <h2>Explore</h2>
+        <h1>Royal Commission for AlUla Services</h1>
+        <p>Explore the services provided by the Royal Commission for AlUla</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="container">
+      <!-- Services Section -->
+      <div class="services-section">
+        <div class="section-title">
+          <h2>Services</h2>
+          <p>Select from our range of agricultural services</p>
+        </div>
+
+        <!-- Services Grid -->
+        <div class="services-grid">
+          <div *ngFor="let service of services" class="service-card" (click)="navigateToService(service.id)">
+            <div class="card-content">
+              <div class="service-icon" [style.background-color]="'rgba(153, 107, 68, ' + ((service.id % 3 + 1) * 0.1) + ')'">
+                <i [class]="service.icon"></i>
+              </div>
+              <h3>{{ service.title }}</h3>
+              <p>{{ service.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Features Section -->
+      <!-- <div class="features-section">
+        <div class="section-title">
+          <h2>Why Choose Us</h2>
+          <p>Experience the benefits of our digital agricultural services</p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="bi bi-lightning-charge"></i>
+            </div>
+            <h3>Fast Processing</h3>
+            <p>Quick and efficient processing of your renewal applications</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <h3>Secure Platform</h3>
+            <p>Your data is protected with advanced security measures</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="bi bi-clock"></i>
+            </div>
+            <h3>24/7 Access</h3>
+            <p>Access your records and services anytime, anywhere</p>
+          </div>
+        </div>
+      </div> -->
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <img src="assets/images/Logo.png" alt="Agricultural Services Logo">
+          <p>© 2025 Agricultural E-Services Portal</p>
+        </div>
+        <div class="footer-links">
+          <div class="link-group">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="#">Home</a></li>
+              <li><a href="#">Services</a></li>
+              <li><a href="#">About Us</a></li>
+              <li><a href="#">Contact</a></li>
+            </ul>
+          </div>
+          <div class="link-group">
+            <h4>Legal</h4>
+            <ul>
+              <li><a href="#">Terms of Service</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Accessibility</a></li>
+            </ul>
+          </div>
+          <div class="link-group">
+            <h4>Connect</h4>
+            <div class="social-links">
+              <a href="#"><i class="bi bi-twitter"></i></a>
+              <a href="#"><i class="bi bi-facebook"></i></a>
+              <a href="#"><i class="bi bi-instagram"></i></a>
+              <a href="#"><i class="bi bi-linkedin"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>

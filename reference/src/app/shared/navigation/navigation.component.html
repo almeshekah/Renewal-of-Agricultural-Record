@@ -1,0 +1,33 @@
+<div class="navigation-container">
+  <div class="navigation-header">
+    <div class="logo">
+      <img src="assets/images/logo.png" alt="Logo">
+    </div>
+    <button class="menu-toggle" (click)="toggleMenu()">
+      <i class="fas" [ngClass]="isMenuOpen ? 'fa-times' : 'fa-bars'"></i>
+    </button>
+  </div>
+  <nav class="navigation-menu" [class.open]="isMenuOpen">
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a class="nav-link" [routerLink]="['/dashboard']" routerLinkActive="active">
+          <i class="fas fa-tachometer-alt"></i>
+          <span>{{ 'nav.dashboard' | translate }}</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [routerLink]="['/applications']" routerLinkActive="active">
+          <i class="fas fa-file-alt"></i>
+          <span>{{ 'nav.applications' | translate }}</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [routerLink]="['/testing/command-test']" routerLinkActive="active">
+          <i class="fas fa-tools"></i>
+          <span>{{ 'testing.commandTest.title' | translate }}</span>
+        </a>
+      </li>
+      <!-- Additional nav items -->
+    </ul>
+  </nav>
+</div>
