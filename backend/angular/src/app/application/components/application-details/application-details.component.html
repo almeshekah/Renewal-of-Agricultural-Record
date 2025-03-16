@@ -32,12 +32,40 @@
         <h2>{{ application.title }}</h2>
         <span class="id-display">#{{ application.applicationNumber }}</span>
       </div>
-      <span class="status-badge" [ngClass]="getStatusClass(application.status)">
-        {{ getStatusDisplayValue(application.status) }}
-      </span>
+      <div class="status-container">
+        <span class="status-badge" [ngClass]="getStatusClass(application.status)">
+          <i class="bi"
+             [ngClass]="{
+               'bi-hourglass-split': application.status.includes('PENDING'),
+               'bi-check-circle-fill': application.status.includes('APPROVED'),
+               'bi-x-circle-fill': application.status.includes('REJECTED'),
+               'bi-pencil-square': application.status === 'DRAFT'
+             }"></i>
+          {{ getStatusDisplayValue(application.status) }}
+        </span>
+      </div>
     </div>
     <div class="card-body">
+      <!-- Application metadata section -->
+      <div class="application-meta">
+        <div class="meta-item">
+          <i class="bi bi-calendar-event"></i>
+          <span>Created: {{ application.creationTime | date:'medium' }}</span>
+        </div>
+        <div class="meta-item">
+          <i class="bi bi-clock-history"></i>
+          <span>Last Updated: {{ application.lastUpdated || application.lastModificationTime | date:'medium' }}</span>
+        </div>
+        <div class="meta-item">
+          <i class="bi bi-person"></i>
+          <span>Assigned To: {{ application.assignedTo || 'Not assigned' }}</span>
+        </div>
+      </div>
+
+      <div class="section-title">Detailed Information</div>
+
       <div class="application-details">
+        <!-- Row 1 -->
         <div class="detail-row">
           <span class="label">Application ID:</span>
           <span class="value">{{ application.id }}</span>
@@ -48,35 +76,47 @@
         </div>
         <div class="detail-row">
           <span class="label">Applicant:</span>
-          <span class="value">{{ application.applicant.name }}</span>
+          <span class="value">{{ application.applicantName || application.applicant?.name }}</span>
         </div>
         <div class="detail-row">
           <span class="label">National ID:</span>
-          <span class="value">{{ application.applicant.nationalId }}</span>
+          <span class="value">{{ application.applicantId || application.applicant?.nationalId }}</span>
         </div>
+
+        <!-- Row 2 -->
         <div class="detail-row">
           <span class="label">Email:</span>
-          <span class="value">{{ application.applicant.email }}</span>
+          <span class="value">{{ application.email || application.applicant?.email }}</span>
         </div>
         <div class="detail-row">
           <span class="label">Phone:</span>
-          <span class="value">{{ application.applicant.phone }}</span>
+          <span class="value">{{ application.mobileNumber || application.applicant?.phone }}</span>
         </div>
         <div class="detail-row">
           <span class="label">Address:</span>
-          <span class="value">{{ application.applicant.address }}</span>
+          <span class="value">{{ application.address || application.applicant?.address }}</span>
         </div>
         <div class="detail-row">
           <span class="label">Farm Location:</span>
-          <span class="value">{{ application.farmLocation.address }}</span>
+          <span class="value">{{ application.farmLocation || (application.farmLocation && application.farmLocation.address) }}</span>
         </div>
+
+        <!-- Row 3 -->
         <div class="detail-row">
           <span class="label">Farm Size:</span>
-          <span class="value">{{ application.farmLocation.size }} hectares</span>
+          <span class="value">{{ (application.farmLocation && application.farmLocation.size) ? application.farmLocation.size + ' hectares' : 'Not specified' }}</span>
         </div>
         <div class="detail-row">
           <span class="label">Region:</span>
-          <span class="value">{{ application.farmLocation.region }}</span>
+          <span class="value">{{ (application.farmLocation && application.farmLocation.region) || application.region || 'Not specified' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Record Type:</span>
+          <span class="value">{{ application.recordType }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Submission Date:</span>
+          <span class="value">{{ application.submissionDate ? (application.submissionDate | date:'medium') : 'Not submitted yet' }}</span>
         </div>
       </div>
     </div>
@@ -102,9 +142,9 @@
   </div>
 
   <!-- Application Process Section -->
-  <div *ngIf="application" class="section">
+  <div *ngIf="application" class="section application-process-section">
     <h2 class="section-heading">
-      <i class="bi bi-list-check me-2"></i>
+      <i class="bi bi-diagram-3 me-2"></i>
       Application Process
     </h2>
     <div class="workflow-timeline">
@@ -112,7 +152,13 @@
       <div class="timeline-step" [ngClass]="{'completed': currentStep > 0, 'current': currentStep === 0}">
         <div class="step-number">1</div>
         <div class="step-content">
-          <div class="step-title">Submit Application</div>
+          <div class="step-title">
+            <i class="bi bi-file-earmark-plus me-2"></i>
+            Submit Application
+          </div>
+          <div class="step-description">
+            Agricultural Record Renewal Application successfully submitted
+          </div>
           <div class="step-status" *ngIf="currentStep > 0">
             <span class="status-badge completed">
               <i class="bi bi-check-circle-fill"></i> Completed
@@ -120,7 +166,7 @@
           </div>
           <div class="step-status" *ngIf="currentStep === 0">
             <span class="status-badge current">
-              <i class="bi bi-arrow-right-circle-fill"></i> Current
+              <i class="bi bi-arrow-right-circle-fill"></i> Current Step
             </span>
           </div>
         </div>
@@ -130,7 +176,13 @@
       <div class="timeline-step" [ngClass]="{'completed': currentStep > 1, 'current': currentStep === 1}">
         <div class="step-number">2</div>
         <div class="step-content">
-          <div class="step-title">LP Specialist Review</div>
+          <div class="step-title">
+            <i class="bi bi-search me-2"></i>
+            LP Specialist Review
+          </div>
+          <div class="step-description">
+            Application review by License and Permit Specialist
+          </div>
           <div class="step-status" *ngIf="currentStep > 1">
             <span class="status-badge completed">
               <i class="bi bi-check-circle-fill"></i> Completed
@@ -138,7 +190,7 @@
           </div>
           <div class="step-status" *ngIf="currentStep === 1">
             <span class="status-badge current">
-              <i class="bi bi-arrow-right-circle-fill"></i> Current
+              <i class="bi bi-arrow-right-circle-fill"></i> Current Step
             </span>
           </div>
         </div>
@@ -148,7 +200,13 @@
       <div class="timeline-step" [ngClass]="{'completed': currentStep > 2, 'current': currentStep === 2}">
         <div class="step-number">3</div>
         <div class="step-content">
-          <div class="step-title">LP Specialist Decision</div>
+          <div class="step-title">
+            <i class="bi bi-clipboard-check me-2"></i>
+            LP Specialist Decision
+          </div>
+          <div class="step-description">
+            Decision made by the License and Permit Specialist
+          </div>
           <div class="step-status" *ngIf="currentStep > 2">
             <span class="status-badge completed">
               <i class="bi bi-check-circle-fill"></i> Completed
@@ -156,7 +214,7 @@
           </div>
           <div class="step-status" *ngIf="currentStep === 2">
             <span class="status-badge current">
-              <i class="bi bi-arrow-right-circle-fill"></i> Current
+              <i class="bi bi-arrow-right-circle-fill"></i> Current Step
             </span>
           </div>
         </div>
@@ -166,7 +224,13 @@
       <div class="timeline-step" [ngClass]="{'completed': currentStep > 3, 'current': currentStep === 3}">
         <div class="step-number">4</div>
         <div class="step-content">
-          <div class="step-title">Agriculture Manager Review</div>
+          <div class="step-title">
+            <i class="bi bi-person-badge me-2"></i>
+            Agriculture Manager Review
+          </div>
+          <div class="step-description">
+            Application and documentation review by Agriculture Department Manager
+          </div>
           <div class="step-status" *ngIf="currentStep > 3">
             <span class="status-badge completed">
               <i class="bi bi-check-circle-fill"></i> Completed
@@ -174,7 +238,7 @@
           </div>
           <div class="step-status" *ngIf="currentStep === 3">
             <span class="status-badge current">
-              <i class="bi bi-arrow-right-circle-fill"></i> Current
+              <i class="bi bi-arrow-right-circle-fill"></i> Current Step
             </span>
           </div>
         </div>
@@ -184,7 +248,13 @@
       <div class="timeline-step" [ngClass]="{'completed': currentStep > 4, 'current': currentStep === 4}">
         <div class="step-number">5</div>
         <div class="step-content">
-          <div class="step-title">Agriculture Manager Decision</div>
+          <div class="step-title">
+            <i class="bi bi-clipboard-check me-2"></i>
+            Agriculture Manager Decision
+          </div>
+          <div class="step-description">
+            Decision made by the Agriculture Department Manager
+          </div>
           <div class="step-status" *ngIf="currentStep > 4">
             <span class="status-badge completed">
               <i class="bi bi-check-circle-fill"></i> Completed
@@ -192,7 +262,7 @@
           </div>
           <div class="step-status" *ngIf="currentStep === 4">
             <span class="status-badge current">
-              <i class="bi bi-arrow-right-circle-fill"></i> Current
+              <i class="bi bi-arrow-right-circle-fill"></i> Current Step
             </span>
           </div>
         </div>
@@ -202,7 +272,13 @@
       <div class="timeline-step" [ngClass]="{'completed': currentStep > 5, 'current': currentStep === 5}">
         <div class="step-number">6</div>
         <div class="step-content">
-          <div class="step-title">COO Review</div>
+          <div class="step-title">
+            <i class="bi bi-person-badge-fill me-2"></i>
+            COO Review
+          </div>
+          <div class="step-description">
+            Application review by Chief Operations Officer
+          </div>
           <div class="step-status" *ngIf="currentStep > 5">
             <span class="status-badge completed">
               <i class="bi bi-check-circle-fill"></i> Completed
@@ -210,7 +286,7 @@
           </div>
           <div class="step-status" *ngIf="currentStep === 5">
             <span class="status-badge current">
-              <i class="bi bi-arrow-right-circle-fill"></i> Current
+              <i class="bi bi-arrow-right-circle-fill"></i> Current Step
             </span>
           </div>
         </div>
@@ -220,7 +296,13 @@
       <div class="timeline-step" [ngClass]="{'completed': currentStep > 6, 'current': currentStep === 6}">
         <div class="step-number">7</div>
         <div class="step-content">
-          <div class="step-title">Final Decision</div>
+          <div class="step-title">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            Final Decision
+          </div>
+          <div class="step-description">
+            Final determination on the agricultural record renewal application
+          </div>
           <div class="step-status" *ngIf="currentStep > 6">
             <span class="status-badge completed">
               <i class="bi bi-check-circle-fill"></i> Completed
@@ -228,7 +310,7 @@
           </div>
           <div class="step-status" *ngIf="currentStep === 6">
             <span class="status-badge current">
-              <i class="bi bi-arrow-right-circle-fill"></i> Current
+              <i class="bi bi-arrow-right-circle-fill"></i> Current Step
             </span>
           </div>
         </div>
@@ -237,33 +319,58 @@
   </div>
 
   <!-- Reviews Section -->
-  <div *ngIf="reviews && reviews.length > 0" class="section">
-    <h2 class="section-heading">
-      <i class="bi bi-chat-left-text me-2"></i>
-      Review History
-    </h2>
-    <div class="reviews-container">
-      <div *ngFor="let review of reviews" class="review-card">
-        <div class="review-header">
+  <div class="review-history-section p-4 mt-4">
+    <div class="section-heading">
+      <i class="bi bi-journal-text"></i>
+      <span>Review History</span>
+    </div>
+
+    <div class="reviews-container" *ngIf="reviews && reviews.length > 0">
+      <div class="review-card" *ngFor="let review of reviews">
+        <div class="review-card-header">
+          <div class="reviewer-avatar">
+            <i class="bi bi-person"></i>
+          </div>
           <div class="reviewer-info">
-            <strong>{{ review.reviewerName }}</strong>
-            <span class="reviewer-role">{{ review.reviewerId === '101' ? 'LP Specialist' : review.reviewerId === '102' ? 'Agriculture Manager' : 'COO' }}</span>
+            <div class="reviewer-name">{{ review.reviewerName || 'System' }}</div>
+            <div class="reviewer-role">{{ review.reviewerId === '101' ? 'LP Specialist' :
+                                          review.reviewerId === '102' ? 'Agriculture Manager' :
+                                          review.reviewerId === '103' ? 'COO' : 'Reviewer' }}</div>
           </div>
+          <div class="review-status" [ngClass]="{
+            'status-approved': review.decision === 'APPROVE',
+            'status-rejected': review.decision === 'REJECT',
+            'status-changes': review.decision === 'REQUEST_CHANGES'
+          }">
+            <i class="bi" [ngClass]="{
+              'bi-check-circle-fill': review.decision === 'APPROVE',
+              'bi-x-circle-fill': review.decision === 'REJECT',
+              'bi-arrow-counterclockwise': review.decision === 'REQUEST_CHANGES'
+            }"></i>
+            <span>{{ review.decision === 'APPROVE' ? 'Approved' :
+                    review.decision === 'REJECT' ? 'Rejected' :
+                    review.decision === 'REQUEST_CHANGES' ? 'Changes Requested' : 'Pending' }}</span>
+          </div>
+        </div>
+        <div class="review-card-body">
           <div class="review-date">
-            {{ review.reviewDate | date:'MMM d, y h:mm a' }}
+            <i class="bi bi-calendar3 me-2"></i>
+            <span>{{ review.reviewDate | date:'medium' }}</span>
           </div>
-        </div>
-        <div class="review-decision"
-             [ngClass]="{'decision-approve': review.decision === 'APPROVE',
-                         'decision-reject': review.decision === 'REJECT',
-                         'decision-change': review.decision === 'REQUEST_CHANGES'}">
-          {{ review.decision === 'APPROVE' ? 'Approved' :
-             review.decision === 'REJECT' ? 'Rejected' : 'Requested Changes' }}
-        </div>
-        <div class="review-comments">
-          {{ review.comment }}
+          <div class="review-comments" *ngIf="review.comment">
+            <div class="comment-label">Comments:</div>
+            <div class="comment-text">
+              {{ review.comment === 'تمت الموافقة على الطلب بعد الفحص والتدقيق' ?
+                 'Application has been approved after examination and verification.' : review.comment }}
+            </div>
+          </div>
         </div>
       </div>
+    </div>
+
+    <div class="text-center p-4" *ngIf="!reviews || reviews.length === 0">
+      <i class="bi bi-info-circle text-muted fs-4"></i>
+      <p class="mt-3 text-muted">No reviews available for this application yet.</p>
     </div>
   </div>
 </div>

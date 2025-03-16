@@ -446,24 +446,108 @@
 /* Application details */
 .application-details {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
 }
 
 .detail-row {
   margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dashed #f0f0f0;
 
   .label {
     display: block;
     color: #6B6B6B;
-    font-size: 0.8rem;
-    margin-bottom: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 0.4rem;
   }
 
   .value {
     color: #333;
     font-weight: 500;
+    font-size: 1rem;
+    word-break: break-word;
   }
+}
+
+/* Status value styling */
+.status-value {
+  display: inline-block;
+  padding: 0.35rem 0.85rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+/* Card styling improvements */
+.application-info {
+  margin-bottom: 2rem;
+  border: none;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: white;
+}
+
+.card-header {
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1.5rem;
+}
+
+.card-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .id-display {
+    color: #6c757d;
+    font-size: 1rem;
+  }
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Status badge classes */
+.badge-primary {
+  background-color: rgba(13, 110, 253, 0.15);
+  color: #0d6efd;
+}
+
+.badge-secondary {
+  background-color: rgba(108, 117, 125, 0.15);
+  color: #6c757d;
+}
+
+.badge-info {
+  background-color: rgba(13, 202, 240, 0.15);
+  color: #0dcaf0;
+}
+
+.badge-success {
+  background-color: rgba(25, 135, 84, 0.15);
+  color: #198754;
+}
+
+.badge-warning {
+  background-color: rgba(255, 193, 7, 0.15);
+  color: #664d03;
+}
+
+.badge-danger {
+  background-color: rgba(220, 53, 69, 0.15);
+  color: #dc3545;
 }
 
 /* Application Process Styles - Improved */
@@ -725,110 +809,160 @@
   }
 }
 
-/* New Application Process Timeline */
+/* New Application Process Timeline - Enhanced Design */
 .workflow-timeline {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  position: relative;
+  margin-left: 49px;
+  padding-right: 20px;
+}
+
+/* Vertical line connecting all steps */
+.workflow-timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 20px;
+  width: 3px;
+  background: linear-gradient(to bottom, #f0f0f0, #e0e0e0);
+  border-radius: 3px;
+  z-index: 0;
 }
 
 .timeline-step {
   display: flex;
-  align-items: flex-start;
   position: relative;
-  padding-bottom: 24px;
-  padding-left: 16px;
-  margin-left: 20px;
-  border-left: 2px solid #e9ecef;
+  margin-bottom: 30px;
+  padding-left: 30px;
+  transition: all 0.3s ease;
 }
 
 .timeline-step:last-child {
-  padding-bottom: 0;
-  border-left: 2px solid transparent;
+  margin-bottom: 0;
 }
 
-.timeline-step.completed {
-  border-left-color: #28a745;
-}
-
-.timeline-step.current {
-  border-left-color: #007bff;
-}
-
+/* Step numbering circle */
 .step-number {
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
-  background-color: #e9ecef;
-  color: #6c757d;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: 16px;
-  margin-left: -21px;
+  font-size: 18px;
+  position: absolute;
+  left: 0;
+  transform: translateX(-50%);
   z-index: 2;
-  border: 2px solid #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 3px solid #fff;
 }
 
+/* Default state (pending) */
+.timeline-step .step-number {
+  background-color: #e9ecef;
+  color: #6c757d;
+}
+
+/* Completed state */
 .timeline-step.completed .step-number {
-  background-color: #28a745;
+  background-color: #4CAF50;
   color: white;
 }
 
+/* Current state */
 .timeline-step.current .step-number {
-  background-color: #007bff;
+  background-color: #2196F3;
   color: white;
+  transform: translateX(-50%) scale(1.1);
+  box-shadow: 0 6px 12px rgba(33, 150, 243, 0.25);
 }
 
 .step-content {
-  padding-left: 16px;
-  margin-top: 8px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px 20px;
+  margin-left: 15px;
+  width: 100%;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border-left: 5px solid #e9ecef;
+}
+
+.timeline-step.completed .step-content {
+  border-left-color: #4CAF50;
+  background-color: rgba(76, 175, 80, 0.05);
+}
+
+.timeline-step.current .step-content {
+  border-left-color: #2196F3;
+  background-color: rgba(33, 150, 243, 0.05);
+  box-shadow: 0 5px 15px rgba(33, 150, 243, 0.1);
 }
 
 .step-title {
-  font-weight: 500;
-  color: #495057;
-  font-size: 16px;
-  margin-bottom: 6px;
-}
-
-.timeline-step.completed .step-title,
-.timeline-step.current .step-title {
   font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
 }
 
 .timeline-step.completed .step-title {
-  color: #28a745;
+  color: #4CAF50;
 }
 
 .timeline-step.current .step-title {
-  color: #007bff;
+  color: #2196F3;
 }
 
 .status-badge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 8px;
-  border-radius: 12px;
+  padding: 6px 12px;
+  border-radius: 20px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
+  margin-top: 5px;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
 }
 
 .status-badge i {
-  margin-right: 4px;
+  margin-right: 6px;
   font-size: 14px;
 }
 
 .status-badge.completed {
-  background-color: rgba(40, 167, 69, 0.1);
-  color: #28a745;
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
 }
 
 .status-badge.current {
-  background-color: rgba(0, 123, 255, 0.1);
-  color: #007bff;
+  background-color: rgba(33, 150, 243, 0.1);
+  color: #2196F3;
+}
+
+/* Add subtle hover effect */
+.timeline-step:hover .step-content {
+  transform: translateX(5px);
+}
+
+/* Animation for the current step */
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(33, 150, 243, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(33, 150, 243, 0); }
+}
+
+.timeline-step.current .step-number {
+  animation: pulse 2s infinite;
 }
 
 /* Review Actions Section - Updated Style */
@@ -901,4 +1035,285 @@
 .btn-danger:hover {
   background-color: #c82333;
   border-color: #bd2130;
+}
+
+/* Application Process Section */
+.application-process-section {
+  background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+  margin-bottom: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  border: none;
+}
+
+.application-process-section .section-heading {
+  color: #333;
+  font-weight: 700;
+  font-size: 1.5rem;
+  padding: 1.5rem;
+  margin: -1.5rem -1.5rem 1.5rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  align-items: center;
+}
+
+.application-process-section .section-heading i {
+  color: #996B44;
+  font-size: 1.8rem;
+  margin-right: 0.75rem;
+}
+
+/* Step Description */
+.step-description {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+/* Animation for step content on hover */
+.timeline-step:hover .step-content {
+  transform: translateX(8px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Add specific styling for completed steps */
+.timeline-step.completed:hover .step-number {
+  transform: translateX(-50%) scale(1.1);
+  box-shadow: 0 6px 12px rgba(76, 175, 80, 0.25);
+}
+
+/* Improve animation for current step */
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(33, 150, 243, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(33, 150, 243, 0); }
+}
+
+/* Improve transitions */
+.timeline-step,
+.step-content,
+.step-number,
+.step-title,
+.status-badge {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Add completion transition */
+.timeline-step.completed .step-content {
+  position: relative;
+  overflow: hidden;
+}
+
+.timeline-step.completed .step-content::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 6px;
+  height: 100%;
+  background: #4CAF50;
+  opacity: 0.8;
+  border-radius: 0 8px 8px 0;
+}
+
+/* Status badge in header */
+.status-container {
+  display: flex;
+  align-items: center;
+}
+
+.status-badge {
+  padding: 0.4rem 1rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  i {
+    font-size: 1rem;
+  }
+}
+
+/* Application metadata section */
+.application-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6c757d;
+  font-size: 0.9rem;
+
+  i {
+    color: #6B6B6B;
+    font-size: 1rem;
+  }
+}
+
+/* Section title */
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+/* Enhanced Review History Styling */
+.review-history-section {
+  background: linear-gradient(to bottom, #fff, #f8f9fa);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.review-history-section .section-heading {
+  display: flex;
+  align-items: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  padding: 1.5rem;
+  margin: -1.5rem -1.5rem 1.5rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.review-history-section .section-heading i {
+  color: #996B44;
+  font-size: 1.5rem;
+  margin-right: 0.75rem;
+}
+
+.reviews-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.5rem;
+}
+
+.review-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.review-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.review-card-header {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.reviewer-avatar {
+  width: 42px;
+  height: 42px;
+  background: #e9ecef;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  color: #6c757d;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.reviewer-info {
+  flex: 1;
+}
+
+.reviewer-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.reviewer-role {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.review-status {
+  padding: 0.35rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: 1rem;
+}
+
+.status-approved {
+  background-color: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+}
+
+.status-rejected {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+.status-changes {
+  background-color: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+}
+
+.review-card-body {
+  padding: 1rem;
+}
+
+.review-date {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.review-comments {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.comment-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.comment-text {
+  color: #495057;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
