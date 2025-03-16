@@ -195,7 +195,7 @@ namespace AgriculturalRecordRenewal.Applications
                     ReviewerRole = "Manager",
                     ReviewDate = DateTime.UtcNow.AddDays(-2),
                     Decision = "APPROVE",
-                    Comment = "الطلب مستوفي للشروط والمتطلبات"
+                    Comment = "The application fulfills all conditions and requirements"
                 });
             }
             
@@ -211,7 +211,7 @@ namespace AgriculturalRecordRenewal.Applications
                     ReviewDate = DateTime.UtcNow.AddDays(-1),
                     Decision = application.Status == "APPROVED" ? "APPROVE" : "REJECT",
                     Comment = application.Status == "APPROVED" 
-                        ? "تمت الموافقة النهائية على الطلب" 
+                        ? "The application has been officially approved" 
                         : "تم رفض الطلب لعدم استيفاء المتطلبات"
                 });
             }
