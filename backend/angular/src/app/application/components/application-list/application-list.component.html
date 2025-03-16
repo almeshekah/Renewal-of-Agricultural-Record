@@ -120,28 +120,68 @@
 
   <!-- Pagination -->
   <div class="pagination" *ngIf="totalPages > 1">
-    <button
+    <div class="pagination-info">
+      {{ (currentPage - 1) * itemsPerPage + 1 }}-{{ Math.min(currentPage * itemsPerPage, totalItems) }} من إجمالي {{ totalItems }} طلب
+    </div>
+    <div class="pagination-controls">
+      <button
         class="page-item"
-      [disabled]="currentPage === 1"
-      (click)="onPageChange(currentPage - 1)"
-    >
-      <i class="fas fa-chevron-left"></i>
-    </button>
-    <button
-      *ngFor="let page of pages"
+        [disabled]="currentPage === 1"
+        (click)="onPageChange(currentPage - 1)"
+        aria-label="السابق"
+      >
+        <i class="fas fa-chevron-right"></i>
+      </button>
+      <!-- Show first page -->
+      <button
+        *ngIf="currentPage > 3"
         class="page-item"
-      [class.active]="page === currentPage"
-      (click)="onPageChange(page)"
-    >
-      {{ page }}
-    </button>
-    <button
+        (click)="onPageChange(1)"
+      >
+        1
+      </button>
+      <!-- Ellipsis if needed -->
+      <span *ngIf="currentPage > 3" class="pagination-ellipsis">...</span>
+      <!-- Previous Page -->
+      <button
+        *ngIf="currentPage > 1"
         class="page-item"
-      [disabled]="currentPage === totalPages"
-      (click)="onPageChange(currentPage + 1)"
-    >
-      <i class="fas fa-chevron-right"></i>
-    </button>
+        (click)="onPageChange(currentPage - 1)"
+      >
+        {{ currentPage - 1 }}
+      </button>
+      <!-- Current Page -->
+      <button
+        class="page-item active"
+      >
+        {{ currentPage }}
+      </button>
+      <!-- Next Page -->
+      <button
+        *ngIf="currentPage < totalPages"
+        class="page-item"
+        (click)="onPageChange(currentPage + 1)"
+      >
+        {{ currentPage + 1 }}
+      </button>
+      <!-- Ellipsis if needed -->
+      <span *ngIf="currentPage < totalPages - 2" class="pagination-ellipsis">...</span>
+      <!-- Last page if not current -->
+      <button
+        *ngIf="currentPage < totalPages - 2"
+        class="page-item"
+        (click)="onPageChange(totalPages)"
+      >
+        {{ totalPages }}
+      </button>
+      <button
+        class="page-item"
+        [disabled]="currentPage === totalPages"
+        (click)="onPageChange(currentPage + 1)"
+        aria-label="التالي"
+      >
+        <i class="fas fa-chevron-left"></i>
+      </button>
     </div>
   </div>
 </div>

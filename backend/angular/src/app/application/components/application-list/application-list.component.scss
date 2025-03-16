@@ -331,36 +331,121 @@ $content-padding: 24px;
 
 // Pagination
 .pagination {
-  @include flex(row, center, center);
-  gap: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
   margin-top: 24px;
+  margin-bottom: 16px;
+  padding: 12px 20px;
+  background-color: $white;
+  border-top: 1px solid $gray-200;
+  border-radius: 0 0 8px 8px;
 
-  .page-btn {
+  .pagination-info {
+    font-size: 14px;
+    color: $gray-600;
+    white-space: nowrap;
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pagination-ellipsis {
+    display: inline-block;
+    min-width: 28px;
+    text-align: center;
+    color: $gray-600;
+    font-weight: bold;
+    margin: 0 2px;
+  }
+
+  .page-item {
     @include button-reset;
-    min-width: 36px;
-    height: 36px;
-    border-radius: 4px;
+    min-width: 40px;
+    height: 40px;
+    border-radius: 8px;
     @include flex(row, center, center);
     background-color: $white;
     color: $gray-700;
     font-size: 14px;
+    font-weight: 500;
     border: 1px solid $gray-300;
-    transition: all 0.2s;
+    transition: all 0.25s ease;
+    margin: 0 2px;
+
+    .fas {
+      font-size: 12px;
+    }
 
     &:hover:not(:disabled) {
-      background-color: $gray-100;
-      border-color: $gray-400;
+      background-color: $primary-light;
+      border-color: $primary;
+      color: $primary;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
     &.active {
       background-color: $primary;
       color: $white;
       border-color: $primary;
+      box-shadow: 0 4px 8px rgba($primary, 0.3);
     }
 
     &:disabled {
-      opacity: 0.5;
+      opacity: 0.4;
       cursor: not-allowed;
+      background-color: $gray-100;
+    }
+  }
+}
+
+/* Responsive adjustments for pagination */
+@media (max-width: 767px) {
+  .pagination {
+    flex-direction: column;
+    gap: 16px;
+
+    .pagination-info {
+      width: 100%;
+      text-align: center;
+    }
+
+    .pagination-controls {
+      width: 100%;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .page-item {
+      min-width: 36px;
+      height: 36px;
+      font-size: 12px;
+    }
+  }
+}
+
+// RTL support for pagination
+[dir="rtl"] {
+  .pagination {
+    .page-item {
+      transform-origin: center;
+
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+      }
+
+      .fas.fa-chevron-left {
+        transform: rotate(180deg);
+      }
+
+      .fas.fa-chevron-right {
+        transform: rotate(180deg);
+      }
     }
   }
 }

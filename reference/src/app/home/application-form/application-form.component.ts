@@ -239,7 +239,7 @@ export class ApplicationFormComponent implements OnInit {
 
 	// Navigation methods for the success modal
 	goToLogin(): void {
-		this.router.navigate(['/auth/login']);
+		this.router.navigate(['/login']);
 	}
 
 	goToServices(): void {

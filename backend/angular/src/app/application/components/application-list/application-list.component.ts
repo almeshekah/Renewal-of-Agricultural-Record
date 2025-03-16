@@ -20,6 +20,9 @@ export class ApplicationListComponent implements OnInit {
   userTasks: TaskItem[] = [];
   isLoading: boolean = false;
 
+  // Make Math available to the template
+  Math = Math;
+
   // Make ApplicationStatus available to the template
   ApplicationStatus = ApplicationStatus;
 

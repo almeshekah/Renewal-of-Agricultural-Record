@@ -281,9 +281,9 @@ export class AgriculturalRecordRenewalComponent implements OnInit {
         localStorage.removeItem('agricultural_workflow_current_step');
 
         // Navigate to the application details page
-        this.router.navigate(['/applications', application.id], {
-          queryParams: { processInstanceId: processInstance.id },
-        });
+        // this.router.navigate(['/applications', application.id], {
+        //   queryParams: { processInstanceId: processInstance.id },
+        // });
       },
       error: error => {
         console.error('Error starting workflow:', error);
@@ -291,7 +291,7 @@ export class AgriculturalRecordRenewalComponent implements OnInit {
           'Application saved but workflow process failed to start. Please contact support.';
 
         // Navigate to application details even if workflow fails
-        this.router.navigate(['/applications', application.id]);
+        // this.router.navigate(['/applications', application.id]);
       },
     });
   }
@@ -394,11 +394,11 @@ export class AgriculturalRecordRenewalComponent implements OnInit {
 
   // Navigation methods for the success modal
   goToLogin(): void {
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/login']);
   }
 
   goToServices(): void {
-    this.router.navigate(['/services']);
+    this.router.navigate(['/']);
   }
 
   // Close the success modal
