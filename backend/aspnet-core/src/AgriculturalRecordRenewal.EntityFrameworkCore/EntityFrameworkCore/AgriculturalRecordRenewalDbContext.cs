@@ -1,9 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
+using AgriculturalRecordRenewal.Applications;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.EntityFrameworkCore;
+using Volo.Abp.EntityFrameworkCore.Modeling;
 using Volo.Abp.FeatureManagement.EntityFrameworkCore;
 using Volo.Abp.Identity;
 using Volo.Abp.Identity.EntityFrameworkCore;
@@ -24,6 +31,16 @@ public class AgriculturalRecordRenewalDbContext :
     ITenantManagementDbContext
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
+    
+    /// <summary>
+    /// طلبات تجديد السجل الزراعي
+    /// </summary>
+    public DbSet<AgriculturalApplication> AgriculturalApplications { get; set; }
+    
+    /// <summary>
+    /// مراجعات الطلبات
+    /// </summary>
+    public DbSet<ApplicationReview> ApplicationReviews { get; set; }
 
     #region Entities from the modules
 
@@ -76,11 +93,54 @@ public class AgriculturalRecordRenewalDbContext :
 
         /* Configure your own tables/entities inside here */
 
-        //builder.Entity<YourEntity>(b =>
-        //{
-        //    b.ToTable(AgriculturalRecordRenewalConsts.DbTablePrefix + "YourEntities", AgriculturalRecordRenewalConsts.DbSchema);
-        //    b.ConfigureByConvention(); //auto configure for the base class props
-        //    //...
-        //});
+        builder.Entity<AgriculturalApplication>(b =>
+        {
+            b.ToTable(AgriculturalRecordRenewalConsts.DbTablePrefix + "AgriculturalApplications", AgriculturalRecordRenewalConsts.DbSchema);
+            b.ConfigureByConvention(); // تكوين تلقائي للخصائص الأساسية
+            
+            // تكوين إضافي للخصائص
+            b.Property(e => e.ApplicationNumber).IsRequired().HasMaxLength(20);
+            b.Property(e => e.Title).IsRequired().HasMaxLength(256);
+            b.Property(e => e.ApplicantName).IsRequired().HasMaxLength(100);
+            b.Property(e => e.Email).HasMaxLength(100);
+            b.Property(e => e.MobileNumber).HasMaxLength(20);
+            b.Property(e => e.Status).IsRequired();
+            b.Property(e => e.FarmLocation).HasMaxLength(200);
+            b.Property(e => e.Address).HasMaxLength(500);
+            b.Property(e => e.RecordType).HasMaxLength(50);
+            b.Property(e => e.AssignedToId).IsRequired(false);
+            b.Property(e => e.AssignedTo).HasMaxLength(100).IsRequired(false);
+            
+            // تخزين تعليقات المراجعة كنص JSON
+            b.Property(e => e.ReviewComments)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+                    v => string.IsNullOrEmpty(v) ? new List<string>() : JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null)
+                );
+
+            b.ApplyObjectExtensionMappings();
+        });
+
+        // تكوين نموذج المراجعات
+        builder.Entity<ApplicationReview>(b =>
+        {
+            b.ToTable(AgriculturalRecordRenewalConsts.DbTablePrefix + "ApplicationReviews", AgriculturalRecordRenewalConsts.DbSchema);
+            b.ConfigureByConvention();
+            
+            b.HasKey(x => x.Id);
+            b.Property(x => x.ApplicationId).IsRequired();
+            b.Property(x => x.ReviewerId).HasMaxLength(36).IsRequired();
+            b.Property(x => x.ReviewerName).HasMaxLength(100).IsRequired();
+            b.Property(x => x.ReviewerRole).HasMaxLength(50).IsRequired();
+            b.Property(x => x.ReviewDate).IsRequired();
+            b.Property(x => x.Decision).HasMaxLength(20).IsRequired();
+            b.Property(x => x.Comment).HasMaxLength(1000);
+            
+            b.HasIndex(x => x.ApplicationId);
+            
+            b.ApplyObjectExtensionMappings();
+        });
+
+        builder.TryConfigureObjectExtensions<AgriculturalRecordRenewalDbContext>();
     }
 }

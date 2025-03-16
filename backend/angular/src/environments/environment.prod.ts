@@ -15,7 +15,7 @@ export const environment = {
     clientId: 'AgriculturalRecordRenewal_App',
     responseType: 'code',
     scope: 'offline_access AgriculturalRecordRenewal',
-    requireHttps: true
+    requireHttps: true,
   },
   apis: {
     default: {
@@ -23,4 +23,5 @@ export const environment = {
       rootNamespace: 'AgriculturalRecordRenewal',
     },
   },
+  apiUrl: 'https://localhost:44392/api',
 } as Environment;

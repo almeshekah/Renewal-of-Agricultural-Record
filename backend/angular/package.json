@@ -34,7 +34,6 @@
     "@ngx-translate/core": "^16.0.4",
     "@ngx-translate/http-loader": "^16.0.1",
     "@volo/ngx-lepton-x.lite": "~2.0.0",
-    "angular-oauth2-oidc": "^15.0.1",
     "bootstrap-icons": "~1.8.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.0.0",

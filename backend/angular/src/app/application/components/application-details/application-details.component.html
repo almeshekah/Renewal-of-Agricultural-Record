@@ -30,7 +30,7 @@
     <div class="card-header">
       <div class="card-title">
         <h2>{{ application.title }}</h2>
-        <span class="id-display">#{{ application.id }}</span>
+        <span class="id-display">#{{ application.applicationNumber }}</span>
       </div>
       <span class="status-badge" [ngClass]="getStatusClass(application.status)">
         {{ getStatusDisplayValue(application.status) }}
@@ -51,9 +51,52 @@
           <span class="value">{{ application.applicant.name }}</span>
         </div>
         <div class="detail-row">
+          <span class="label">National ID:</span>
+          <span class="value">{{ application.applicant.nationalId }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Email:</span>
+          <span class="value">{{ application.applicant.email }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Phone:</span>
+          <span class="value">{{ application.applicant.phone }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Address:</span>
+          <span class="value">{{ application.applicant.address }}</span>
+        </div>
+        <div class="detail-row">
           <span class="label">Farm Location:</span>
           <span class="value">{{ application.farmLocation.address }}</span>
         </div>
+        <div class="detail-row">
+          <span class="label">Farm Size:</span>
+          <span class="value">{{ application.farmLocation.size }} hectares</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Region:</span>
+          <span class="value">{{ application.farmLocation.region }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviewer Actions Section -->
+  <div *ngIf="application && canReview()" class="review-actions-section">
+    <div class="section">
+      <h3 class="section-heading">Review Actions</h3>
+      <p class="review-message">This application requires your review as {{ currentUser?.role }}</p>
+      <div class="review-buttons">
+        <button class="btn btn-success" (click)="approveApplication()">
+          <i class="bi bi-check-circle"></i> Approve
+        </button>
+        <button class="btn btn-warning" (click)="returnForRevision()">
+          <i class="bi bi-arrow-counterclockwise"></i> Return for Revision
+        </button>
+        <button class="btn btn-danger" (click)="rejectApplication()">
+          <i class="bi bi-x-circle"></i> Reject Application
+        </button>
       </div>
     </div>
   </div>
@@ -64,126 +107,161 @@
       <i class="bi bi-list-check me-2"></i>
       Application Process
     </h2>
-    <div class="workflow-steps">
-      <div *ngFor="let step of workflowSteps; let i = index"
-           class="workflow-step"
-           [ngClass]="getStepClass(i)">
-        <div class="step-header">
-          <div class="step-number">{{ i + 1 }}</div>
-          <div class="step-title">{{ step.label }}</div>
-          <div class="step-status" *ngIf="i < currentStep">
-            <span class="badge badge-success"><i class="bi bi-check"></i> Completed</span>
+    <div class="workflow-timeline">
+      <!-- Step 1: Submit Application -->
+      <div class="timeline-step" [ngClass]="{'completed': currentStep > 0, 'current': currentStep === 0}">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <div class="step-title">Submit Application</div>
+          <div class="step-status" *ngIf="currentStep > 0">
+            <span class="status-badge completed">
+              <i class="bi bi-check-circle-fill"></i> Completed
+            </span>
           </div>
-          <div class="step-status" *ngIf="i === currentStep">
-            <span class="badge badge-primary"><i class="bi bi-arrow-right"></i> Current</span>
+          <div class="step-status" *ngIf="currentStep === 0">
+            <span class="status-badge current">
+              <i class="bi bi-arrow-right-circle-fill"></i> Current
+            </span>
           </div>
         </div>
+      </div>
+
+      <!-- Step 2: LP Specialist Review -->
+      <div class="timeline-step" [ngClass]="{'completed': currentStep > 1, 'current': currentStep === 1}">
+        <div class="step-number">2</div>
         <div class="step-content">
-          <!-- Step 1: L&P Specialist Review -->
-          <div *ngIf="i === 1 && currentStep === 0 && application" class="step-actions">
-            <button class="btn btn-primary"
-                    (click)="startLPSpecialistReview()"
-                    [disabled]="isLoading">
-              <i class="bi bi-clipboard-check"></i> Send to L&P Specialist Review
-            </button>
+          <div class="step-title">LP Specialist Review</div>
+          <div class="step-status" *ngIf="currentStep > 1">
+            <span class="status-badge completed">
+              <i class="bi bi-check-circle-fill"></i> Completed
+            </span>
           </div>
-
-          <!-- Step 2: L&P Specialist Decision -->
-          <div *ngIf="i === 2 && currentStep === 1 && application" class="step-actions">
-            <button class="btn btn-success"
-                    (click)="approveLPSpecialist()"
-                    [disabled]="isLoading">
-              <i class="bi bi-check-circle"></i> Approve
-            </button>
-
-            <button class="btn btn-warning"
-                    (click)="returnApplication('LP_SPECIALIST')"
-                    [disabled]="isLoading">
-              <i class="bi bi-arrow-return-left"></i> Return for Revision
-            </button>
-
-            <button class="btn btn-danger"
-                    (click)="rejectApplication('LP_SPECIALIST')"
-                    [disabled]="isLoading">
-              <i class="bi bi-x-circle"></i> Reject Application
-            </button>
+          <div class="step-status" *ngIf="currentStep === 1">
+            <span class="status-badge current">
+              <i class="bi bi-arrow-right-circle-fill"></i> Current
+            </span>
           </div>
+        </div>
+      </div>
 
-          <!-- Step 3: Manager Review -->
-          <div *ngIf="i === 3 && currentStep === 2 && application" class="step-actions">
-            <button class="btn btn-primary"
-                    (click)="startManagerReview()"
-                    [disabled]="isLoading">
-              <i class="bi bi-clipboard-check"></i> Send to Manager Review
-            </button>
+      <!-- Step 3: LP Specialist Decision -->
+      <div class="timeline-step" [ngClass]="{'completed': currentStep > 2, 'current': currentStep === 2}">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <div class="step-title">LP Specialist Decision</div>
+          <div class="step-status" *ngIf="currentStep > 2">
+            <span class="status-badge completed">
+              <i class="bi bi-check-circle-fill"></i> Completed
+            </span>
           </div>
-
-          <!-- Step 4: Manager Decision -->
-          <div *ngIf="i === 4 && currentStep === 3 && application" class="step-actions">
-            <button class="btn btn-success"
-                    (click)="approveManager()"
-                    [disabled]="isLoading">
-              <i class="bi bi-check-circle"></i> Approve
-            </button>
-
-            <button class="btn btn-warning"
-                    (click)="returnApplication('AGRICULTURE_MANAGER')"
-                    [disabled]="isLoading">
-              <i class="bi bi-arrow-return-left"></i> Return for Revision
-            </button>
+          <div class="step-status" *ngIf="currentStep === 2">
+            <span class="status-badge current">
+              <i class="bi bi-arrow-right-circle-fill"></i> Current
+            </span>
           </div>
+        </div>
+      </div>
 
-          <!-- Step 5: COO Review -->
-          <div *ngIf="i === 5 && currentStep === 4 && application" class="step-actions">
-            <button class="btn btn-primary"
-                    (click)="startCOOReview()"
-                    [disabled]="isLoading">
-              <i class="bi bi-clipboard-check"></i> Send to COO Review
-            </button>
+      <!-- Step 4: Agriculture Manager Review -->
+      <div class="timeline-step" [ngClass]="{'completed': currentStep > 3, 'current': currentStep === 3}">
+        <div class="step-number">4</div>
+        <div class="step-content">
+          <div class="step-title">Agriculture Manager Review</div>
+          <div class="step-status" *ngIf="currentStep > 3">
+            <span class="status-badge completed">
+              <i class="bi bi-check-circle-fill"></i> Completed
+            </span>
           </div>
+          <div class="step-status" *ngIf="currentStep === 3">
+            <span class="status-badge current">
+              <i class="bi bi-arrow-right-circle-fill"></i> Current
+            </span>
+          </div>
+        </div>
+      </div>
 
-          <!-- Step 6: COO Decision -->
-          <div *ngIf="i === 6 && currentStep === 5 && application" class="step-actions">
-            <button class="btn btn-success"
-                    (click)="approveCOO()"
-                    [disabled]="isLoading">
-              <i class="bi bi-check-circle"></i> Approve
-            </button>
+      <!-- Step 5: Agriculture Manager Decision -->
+      <div class="timeline-step" [ngClass]="{'completed': currentStep > 4, 'current': currentStep === 4}">
+        <div class="step-number">5</div>
+        <div class="step-content">
+          <div class="step-title">Agriculture Manager Decision</div>
+          <div class="step-status" *ngIf="currentStep > 4">
+            <span class="status-badge completed">
+              <i class="bi bi-check-circle-fill"></i> Completed
+            </span>
+          </div>
+          <div class="step-status" *ngIf="currentStep === 4">
+            <span class="status-badge current">
+              <i class="bi bi-arrow-right-circle-fill"></i> Current
+            </span>
+          </div>
+        </div>
+      </div>
 
-            <button class="btn btn-warning"
-                    (click)="returnApplication('COO')"
-                    [disabled]="isLoading">
-              <i class="bi bi-arrow-return-left"></i> Return for Revision
-            </button>
+      <!-- Step 6: COO Review -->
+      <div class="timeline-step" [ngClass]="{'completed': currentStep > 5, 'current': currentStep === 5}">
+        <div class="step-number">6</div>
+        <div class="step-content">
+          <div class="step-title">COO Review</div>
+          <div class="step-status" *ngIf="currentStep > 5">
+            <span class="status-badge completed">
+              <i class="bi bi-check-circle-fill"></i> Completed
+            </span>
+          </div>
+          <div class="step-status" *ngIf="currentStep === 5">
+            <span class="status-badge current">
+              <i class="bi bi-arrow-right-circle-fill"></i> Current
+            </span>
+          </div>
+        </div>
+      </div>
 
-            <button class="btn btn-danger"
-                    (click)="rejectCOO()"
-                    [disabled]="isLoading">
-              <i class="bi bi-x-circle"></i> Reject Application
-            </button>
+      <!-- Step 7: Final Decision -->
+      <div class="timeline-step" [ngClass]="{'completed': currentStep > 6, 'current': currentStep === 6}">
+        <div class="step-number">7</div>
+        <div class="step-content">
+          <div class="step-title">Final Decision</div>
+          <div class="step-status" *ngIf="currentStep > 6">
+            <span class="status-badge completed">
+              <i class="bi bi-check-circle-fill"></i> Completed
+            </span>
+          </div>
+          <div class="step-status" *ngIf="currentStep === 6">
+            <span class="status-badge current">
+              <i class="bi bi-arrow-right-circle-fill"></i> Current
+            </span>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Application History -->
-  <div *ngIf="application && application.reviews && application.reviews.length > 0" class="section">
+  <!-- Reviews Section -->
+  <div *ngIf="reviews && reviews.length > 0" class="section">
     <h2 class="section-heading">
-      <i class="bi bi-clock-history me-2"></i>
-      Application History
+      <i class="bi bi-chat-left-text me-2"></i>
+      Review History
     </h2>
-    <div class="application-timeline">
-      <div class="timeline">
-        <div *ngFor="let review of application.reviews" class="timeline-item">
-          <div class="timeline-icon" [ngClass]="{'approved': review.decision === 'APPROVE', 'returned': review.decision === 'REQUEST_CHANGES', 'rejected': review.decision === 'REJECT'}">
-            <i class="bi" [ngClass]="{'bi-check': review.decision === 'APPROVE', 'bi-arrow-return-left': review.decision === 'REQUEST_CHANGES', 'bi-x': review.decision === 'REJECT'}"></i>
+    <div class="reviews-container">
+      <div *ngFor="let review of reviews" class="review-card">
+        <div class="review-header">
+          <div class="reviewer-info">
+            <strong>{{ review.reviewerName }}</strong>
+            <span class="reviewer-role">{{ review.reviewerId === '101' ? 'LP Specialist' : review.reviewerId === '102' ? 'Agriculture Manager' : 'COO' }}</span>
           </div>
-          <div class="timeline-content">
-            <h4>{{ review.reviewerName }} ({{ review.reviewerRole }})</h4>
-            <p>{{ review.comments }}</p>
-            <span class="timeline-date">{{ review.timestamp | date:'medium' }}</span>
+          <div class="review-date">
+            {{ review.reviewDate | date:'MMM d, y h:mm a' }}
           </div>
+        </div>
+        <div class="review-decision"
+             [ngClass]="{'decision-approve': review.decision === 'APPROVE',
+                         'decision-reject': review.decision === 'REJECT',
+                         'decision-change': review.decision === 'REQUEST_CHANGES'}">
+          {{ review.decision === 'APPROVE' ? 'Approved' :
+             review.decision === 'REJECT' ? 'Rejected' : 'Requested Changes' }}
+        </div>
+        <div class="review-comments">
+          {{ review.comment }}
         </div>
       </div>
     </div>

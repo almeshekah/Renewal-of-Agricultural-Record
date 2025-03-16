@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  id="agricultural_record_renewal"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+
+  <bpmn:process id="agricultural_record_renewal_process" name="Agricultural Record Renewal Process" isExecutable="true">
+    <!-- Start Event -->
+    <bpmn:startEvent id="start_event" name="Application Submitted">
+      <bpmn:outgoing>flow_to_lp_review</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <!-- LP Specialist Review -->
+    <bpmn:userTask id="lp_specialist_review" name="LP Specialist Review" camunda:assignee="${lpSpecialist}">
+      <bpmn:incoming>flow_to_lp_review</bpmn:incoming>
+      <bpmn:outgoing>flow_from_lp_review</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <!-- LP Specialist Decision Gateway -->
+    <bpmn:exclusiveGateway id="lp_decision_gateway" name="LP Specialist Decision">
+      <bpmn:incoming>flow_from_lp_review</bpmn:incoming>
+      <bpmn:outgoing>flow_to_manager_review</bpmn:outgoing>
+      <bpmn:outgoing>flow_to_return_to_applicant_lp</bpmn:outgoing>
+      <bpmn:outgoing>flow_to_reject_lp</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <!-- Agriculture Manager Review -->
+    <bpmn:userTask id="manager_review" name="Agriculture Manager Review" camunda:assignee="${manager}">
+      <bpmn:incoming>flow_to_manager_review</bpmn:incoming>
+      <bpmn:outgoing>flow_from_manager_review</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <!-- Manager Decision Gateway -->
+    <bpmn:exclusiveGateway id="manager_decision_gateway" name="Manager Decision">
+      <bpmn:incoming>flow_from_manager_review</bpmn:incoming>
+      <bpmn:outgoing>flow_to_coo_review</bpmn:outgoing>
+      <bpmn:outgoing>flow_to_return_to_lp</bpmn:outgoing>
+      <bpmn:outgoing>flow_to_reject_manager</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <!-- COO Review -->
+    <bpmn:userTask id="coo_review" name="COO Review" camunda:assignee="${coo}">
+      <bpmn:incoming>flow_to_coo_review</bpmn:incoming>
+      <bpmn:outgoing>flow_from_coo_review</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <!-- COO Decision Gateway -->
+    <bpmn:exclusiveGateway id="coo_decision_gateway" name="COO Decision">
+      <bpmn:incoming>flow_from_coo_review</bpmn:incoming>
+      <bpmn:outgoing>flow_to_approve</bpmn:outgoing>
+      <bpmn:outgoing>flow_to_return_to_manager</bpmn:outgoing>
+      <bpmn:outgoing>flow_to_reject_coo</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <!-- Return to Applicant Task -->
+    <bpmn:userTask id="return_to_applicant" name="Return to Applicant">
+      <bpmn:incoming>flow_to_return_to_applicant_lp</bpmn:incoming>
+      <bpmn:outgoing>flow_to_lp_review</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <!-- Return to LP Task -->
+    <bpmn:userTask id="return_to_lp" name="Return to LP">
+      <bpmn:incoming>flow_to_return_to_lp</bpmn:incoming>
+      <bpmn:outgoing>flow_to_lp_review</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <!-- Return to Manager Task -->
+    <bpmn:userTask id="return_to_manager" name="Return to Manager">
+      <bpmn:incoming>flow_to_return_to_manager</bpmn:incoming>
+      <bpmn:outgoing>flow_to_manager_review</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <!-- Rejection End Events -->
+    <bpmn:endEvent id="reject_lp" name="Rejected by LP">
+      <bpmn:incoming>flow_to_reject_lp</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:endEvent id="reject_manager" name="Rejected by Manager">
+      <bpmn:incoming>flow_to_reject_manager</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:endEvent id="reject_coo" name="Rejected by COO">
+      <bpmn:incoming>flow_to_reject_coo</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <!-- Approval End Event -->
+    <bpmn:endEvent id="approve" name="Application Approved">
+      <bpmn:incoming>flow_to_approve</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <!-- Sequence Flows -->
+    <bpmn:sequenceFlow id="flow_to_lp_review" sourceRef="start_event" targetRef="lp_specialist_review" />
+    <bpmn:sequenceFlow id="flow_from_lp_review" sourceRef="lp_specialist_review" targetRef="lp_decision_gateway" />
+    <bpmn:sequenceFlow id="flow_to_manager_review" sourceRef="lp_decision_gateway" targetRef="manager_review">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${decision == 'APPROVE'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="flow_to_return_to_applicant_lp" sourceRef="lp_decision_gateway" targetRef="return_to_applicant">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${decision == 'RETURN'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="flow_to_reject_lp" sourceRef="lp_decision_gateway" targetRef="reject_lp">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${decision == 'REJECT'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="flow_from_manager_review" sourceRef="manager_review" targetRef="manager_decision_gateway" />
+    <bpmn:sequenceFlow id="flow_to_coo_review" sourceRef="manager_decision_gateway" targetRef="coo_review">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${decision == 'APPROVE'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="flow_to_return_to_lp" sourceRef="manager_decision_gateway" targetRef="return_to_lp">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${decision == 'RETURN'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="flow_to_reject_manager" sourceRef="manager_decision_gateway" targetRef="reject_manager">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${decision == 'REJECT'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="flow_from_coo_review" sourceRef="coo_review" targetRef="coo_decision_gateway" />
+    <bpmn:sequenceFlow id="flow_to_approve" sourceRef="coo_decision_gateway" targetRef="approve">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${decision == 'APPROVE'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="flow_to_return_to_manager" sourceRef="coo_decision_gateway" targetRef="return_to_manager">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${decision == 'RETURN'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="flow_to_reject_coo" sourceRef="coo_decision_gateway" targetRef="reject_coo">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${decision == 'REJECT'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+</bpmn:definitions> 

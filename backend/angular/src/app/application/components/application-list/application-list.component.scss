@@ -189,6 +189,10 @@ $content-padding: 24px;
   table {
     width: 100%;
     border-collapse: collapse;
+    background-color: $white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
 
     th, td {
       padding: 16px;
@@ -199,8 +203,8 @@ $content-padding: 24px;
     th {
       background-color: $gray-100;
       font-weight: 600;
-      font-size: 14px;
       color: $gray-700;
+      font-size: 14px;
     }
 
     td {
@@ -208,42 +212,49 @@ $content-padding: 24px;
       color: $gray-800;
     }
 
-    tr:last-child td {
-      border-bottom: none;
+    .application-row {
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: $primary-light;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
+      }
+
+      &:active {
+        background-color: darken($primary-light, 5%);
+        transform: translateY(0);
+      }
     }
 
-    tr:hover td {
-      background-color: $gray-100;
-    }
-  }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      color: $white;
 
-  .status-badge {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 500;
-    text-align: center;
-    min-width: 80px;
+      &.badge-secondary {
+        background-color: $status-draft;
+      }
 
-    &.status-draft {
-      background-color: $gray-200;
-      color: $gray-700;
-    }
+      &.badge-primary {
+        background-color: $primary;
+      }
 
-    &.status-pending {
-      background-color: rgba($warning, 0.2);
-      color: darken($warning, 25%);
-    }
+      &.badge-info {
+        background-color: #17a2b8;
+      }
 
-    &.status-approved {
-      background-color: rgba($success, 0.2);
-      color: darken($success, 10%);
-    }
+      &.badge-success {
+        background-color: $status-approved;
+      }
 
-    &.status-rejected {
-      background-color: rgba($danger, 0.2);
-      color: darken($danger, 10%);
+      &.badge-danger {
+        background-color: $status-rejected;
+      }
     }
   }
 
@@ -351,5 +362,27 @@ $content-padding: 24px;
       opacity: 0.5;
       cursor: not-allowed;
     }
+  }
+}
+
+/* Loading indicator */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  text-align: center;
+  width: 100%;
+
+  .spinner {
+    font-size: 2rem;
+    color: #0056b3;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: #555;
+    font-size: 1.1rem;
   }
 }

@@ -3,6 +3,15 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ApplicationDataService } from '../../../shared/services/application-data.service';
+import { ApplicationService } from '../../../application/services/application.service';
+import { WorkflowService } from '../../../application/services/workflow.service';
+import {
+  Application,
+  ApplicationStatus,
+  ApplicationDocument,
+  Applicant,
+} from '../../../application/models/application.model';
+import { finalize } from 'rxjs/operators';
 
 // Add type for documents
 interface DocumentStorage {
@@ -68,7 +77,9 @@ export class AgriculturalRecordRenewalComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private translate: TranslateService,
-    private applicationDataService: ApplicationDataService
+    private applicationDataService: ApplicationDataService,
+    private applicationService: ApplicationService,
+    private workflowService: WorkflowService
   ) {
     this.applicationForm = this.fb.group({});
   }
@@ -201,45 +212,179 @@ export class AgriculturalRecordRenewalComponent implements OnInit {
 
     if (this.applicationForm.valid && this.isFormValid) {
       this.isLoading = true;
-      console.log('Form submitted', this.applicationForm.value);
-      console.log('Uploaded files', this.uploadedFiles);
+      this.errorMessage = '';
 
-      // Fix any potential validation issues for demo purposes
-      this.ensureFormValuesForSubmission();
+      // Create application object from form data
+      const applicationData = this.createApplicationObject();
 
-      // Save the form data to the service if available
-      if (this.applicationDataService) {
-        this.applicationDataService.setApplicationData(this.applicationForm.value);
-      }
+      // First, create the application
+      this.applicationService
+        .createApplication(applicationData)
+        .pipe(finalize(() => (this.isLoading = false)))
+        .subscribe({
+          next: savedApplication => {
+            console.log('Application created successfully:', savedApplication);
+            this.applicationNumber = savedApplication.applicationNumber;
+            this.formSubmitted = true;
 
-      // Reset any existing workflow data
-      localStorage.removeItem('agricultural_workflow_application');
-      localStorage.removeItem('agricultural_workflow_current_step');
+            // Store application data for reference
+            this.applicationDataService.setApplicationData({
+              ...this.applicationForm.value,
+              applicationId: savedApplication.id,
+              applicationNumber: savedApplication.applicationNumber,
+              status: savedApplication.status,
+            });
 
-      // Create the test application entries
-      this.createTestApplicationEntries();
-
-      // Generate an application number
-      this.generateApplicationNumber();
-
-      // Simulate form submission delay
-      setTimeout(() => {
-        this.isLoading = false;
-        this.formSubmitted = true;
-      }, 1500);
+            // Then, start the workflow process
+            this.startWorkflowProcess(savedApplication);
+          },
+          error: error => {
+            console.error('Error creating application:', error);
+            this.errorMessage = 'Failed to create application. Please try again.';
+            this.isLoading = false;
+          },
+        });
     } else {
-      this.errorMessage = 'Please complete all required fields correctly';
+      this.errorMessage = 'Please fill in all required fields correctly.';
     }
   }
 
-  // Generate a random application number
-  private generateApplicationNumber(): void {
-    const prefix = 'AGR';
-    const year = new Date().getFullYear();
-    const randomDigits = Math.floor(Math.random() * 10000)
-      .toString()
-      .padStart(4, '0');
-    this.applicationNumber = `${prefix}-${year}-${randomDigits}`;
+  private startWorkflowProcess(application: Application): void {
+    const personalInfo = this.applicationForm.get('personalInfo')?.value;
+    const farmInfo = this.applicationForm.get('farmInfo')?.value;
+
+    const startProcessParams = {
+      applicationId: application.id,
+      applicantId: application.applicant.id,
+      processDefinitionKey: 'agricultural-record-renewal',
+      // Add the new fields
+      fullName: personalInfo.fullName,
+      email: personalInfo.email,
+      mobileNumber: personalInfo.mobile,
+      address: personalInfo.address,
+      farmLocation: farmInfo.location,
+    };
+
+    this.workflowService.startProcess(startProcessParams).subscribe({
+      next: processInstance => {
+        console.log('Workflow process started with ID:', processInstance.id);
+
+        // Update stored application data with process ID
+        const storedData = this.applicationDataService.getApplicationData();
+        this.applicationDataService.setApplicationData({
+          ...storedData,
+          processInstanceId: processInstance.id,
+        });
+
+        // Clear any existing workflow data
+        localStorage.removeItem('agricultural_workflow_application');
+        localStorage.removeItem('agricultural_workflow_current_step');
+
+        // Navigate to the application details page
+        this.router.navigate(['/applications', application.id], {
+          queryParams: { processInstanceId: processInstance.id },
+        });
+      },
+      error: error => {
+        console.error('Error starting workflow:', error);
+        this.errorMessage =
+          'Application saved but workflow process failed to start. Please contact support.';
+
+        // Navigate to application details even if workflow fails
+        this.router.navigate(['/applications', application.id]);
+      },
+    });
+  }
+
+  private createApplicationObject(): Application {
+    const formValue = this.applicationForm.value;
+    const personalInfo = formValue.personalInfo;
+    const farmInfo = formValue.farmInfo;
+    const licenseInfo = formValue.licenseInfo;
+
+    // Create applicant with required id field
+    const applicant: Applicant = {
+      id: 'USER-' + personalInfo.nationalId, // Using nationalId as a temporary ID
+      name: personalInfo.fullName,
+      nationalId: personalInfo.nationalId,
+      email: personalInfo.email,
+      phone: personalInfo.mobile,
+      address: personalInfo.address,
+    };
+
+    const documents = this.processDocuments(formValue.documents);
+
+    // Create the application object with all required fields
+    return {
+      id: 'TEMP-' + Math.floor(Math.random() * 10000).toString(), // Temporary ID
+      applicationNumber: this.generateApplicationNumber(),
+      title: 'Agricultural Record Renewal Application',
+      applicant,
+      farmLocation: {
+        address: farmInfo.location,
+        size: farmInfo.farmSize,
+        crops: farmInfo.cropTypes,
+        hasIrrigationSystem: farmInfo.hasIrrigationSystem,
+        region: farmInfo.region,
+      },
+      address: personalInfo.address,
+      previousLicense: licenseInfo.hasPreviousLicense
+        ? {
+            number: licenseInfo.licenseNumber,
+            issueDate: licenseInfo.issueDate,
+            expiryDate: licenseInfo.expiryDate,
+            activityType: licenseInfo.activityType,
+          }
+        : undefined,
+      documents,
+      status: ApplicationStatus.DRAFT,
+      submissionDate: null, // Will be set when submitted
+      updatedAt: new Date().toISOString(),
+      comments: [],
+      reviews: [],
+    };
+  }
+
+  private processDocuments(documents: DocumentStorage): ApplicationDocument[] {
+    const result: ApplicationDocument[] = [];
+
+    Object.entries(documents).forEach(([key, file]) => {
+      if (file && key !== 'termsAgreed') {
+        result.push({
+          id: 0, // Will be assigned by backend
+          type: key,
+          name: file.name,
+          size: file.size,
+          contentType: file.type,
+          uploadDate: new Date().toISOString(),
+          content: file, // The actual file will be handled by the backend
+        });
+      }
+    });
+
+    return result;
+  }
+
+  get isFormValid(): boolean {
+    const documents = this.applicationForm.get('documents');
+    if (!documents) return false;
+
+    const hasPreviousLicense = this.applicationForm.get('licenseInfo.hasPreviousLicense')?.value;
+    const requiredDocs = ['id', 'commercial', 'land_deed'];
+
+    if (hasPreviousLicense) {
+      requiredDocs.push('prev_license');
+    }
+
+    return (
+      requiredDocs.every(doc => this.uploadedFiles[doc]) &&
+      documents.get('termsAgreed')?.value === true
+    );
+  }
+
+  // Generate an application number using the service
+  private generateApplicationNumber(): string {
+    return this.applicationService.generateApplicationNumber();
   }
 
   // Return the application number for display in the template
@@ -372,116 +517,6 @@ export class AgriculturalRecordRenewalComponent implements OnInit {
 
     cropTypesControl?.markAsDirty();
     cropTypesControl?.updateValueAndValidity();
-  }
-
-  get isFormValid(): boolean {
-    if (this.currentStep !== this.totalSteps) {
-      return true; // Only check validity on the last step for submit button
-    }
-
-    const documentsGroup = this.applicationForm.get('documents') as FormGroup;
-    const hasPrevLicense = this.applicationForm.get('licenseInfo.hasPreviousLicense')?.value;
-
-    // Validate required document uploads
-    const idValid = !!this.uploadedFiles['id'];
-    const commercialValid = !!this.uploadedFiles['commercial'];
-    const landDeedValid = !!this.uploadedFiles['land_deed'];
-    const prevLicenseValid = !hasPrevLicense || !!this.uploadedFiles['prev_license'];
-
-    // Validate terms agreement
-    const termsAgreed = this.applicationForm.get('documents.termsAgreed')?.value;
-
-    return idValid && commercialValid && landDeedValid && prevLicenseValid && termsAgreed;
-  }
-
-  // Ensure the form has valid values for required fields
-  private ensureFormValuesForSubmission(): void {
-    const personalInfo = this.applicationForm.get('personalInfo');
-    if (personalInfo) {
-      if (!personalInfo.get('fullName')?.value) {
-        personalInfo.get('fullName')?.setValue('Demo User');
-      }
-      if (!personalInfo.get('nationalId')?.value) {
-        personalInfo.get('nationalId')?.setValue('1234567890');
-      }
-      if (!personalInfo.get('email')?.value) {
-        personalInfo.get('email')?.setValue('demo@example.com');
-      }
-      if (!personalInfo.get('mobile')?.value) {
-        personalInfo.get('mobile')?.setValue('9665XXXXXXXX');
-      }
-      if (!personalInfo.get('address')?.value) {
-        personalInfo.get('address')?.setValue('Demo Address');
-      }
-    }
-
-    const farmInfo = this.applicationForm.get('farmInfo');
-    if (farmInfo) {
-      if (!farmInfo.get('location')?.value) {
-        farmInfo.get('location')?.setValue('Demo Location');
-      }
-      if (!farmInfo.get('farmSize')?.value) {
-        farmInfo.get('farmSize')?.setValue(100);
-      }
-      if (!farmInfo.get('cropTypes')?.value || farmInfo.get('cropTypes')?.value.length === 0) {
-        farmInfo.get('cropTypes')?.setValue(['wheat']);
-      }
-      if (!farmInfo.get('region')?.value) {
-        farmInfo.get('region')?.setValue('riyadh');
-      }
-    }
-
-    const licenseInfo = this.applicationForm.get('licenseInfo');
-    if (licenseInfo) {
-      if (!licenseInfo.get('activityType')?.value) {
-        licenseInfo.get('activityType')?.setValue('crops');
-      }
-    }
-
-    // Make sure terms are agreed to
-    this.applicationForm.get('documents.termsAgreed')?.setValue(true);
-  }
-
-  // Create test application entries for demo
-  private createTestApplicationEntries(): void {
-    const formData = this.applicationForm.value;
-    const personalInfo = formData.personalInfo || {};
-    const farmInfo = formData.farmInfo || {};
-
-    // Generate a unique application ID
-    const baseAppId = Math.floor(Math.random() * 10000);
-    const baseAppNumber = 'AGR-' + new Date().getFullYear() + '-';
-    const currentDate = new Date();
-
-    // Create a single application entry
-    const application = {
-      id: baseAppId,
-      applicationNumber: baseAppNumber + baseAppId,
-      title: `${personalInfo.fullName}'s Farm Renewal Application`,
-      description: 'Agricultural record renewal application',
-      status: 'SUBMITTED',
-      submittedAt: currentDate,
-      updatedAt: currentDate,
-      applicant: {
-        id: 999,
-        name: personalInfo.fullName || 'Demo User',
-        email: personalInfo.email || 'demo@example.com',
-        phone: personalInfo.mobile || '9665XXXXXXXX',
-        nationalId: personalInfo.nationalId || '1234567890',
-        address: personalInfo.address || 'Demo Address',
-      },
-      farmLocation: {
-        address: farmInfo.location || 'Unknown Location',
-        size: farmInfo.farmSize || 100,
-        crops: farmInfo.cropTypes || ['Unknown'],
-        region: farmInfo.region || 'riyadh',
-      },
-      documents: [],
-      comments: [],
-    };
-
-    // Store the application in localStorage for demo purposes
-    localStorage.setItem('agricultural_application', JSON.stringify(application));
   }
 
   // Language switching

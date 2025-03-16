@@ -1,7 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Application, ApplicationStatus } from '../../models/application.model';
-import { ApplicationService } from '../../services/application.service';
+import {
+  ApplicationService,
+  ApplicationRecord,
+  TaskItem,
+} from '../../services/application.service';
+import { AuthService } from '../../../auth/services/auth.service';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-application-list',
@@ -9,14 +15,17 @@ import { ApplicationService } from '../../services/application.service';
   styleUrls: ['./application-list.component.scss'],
 })
 export class ApplicationListComponent implements OnInit {
-  applications: Application[] = [];
-  filteredApplications: Application[] = [];
+  applications: ApplicationRecord[] = [];
+  filteredApplications: ApplicationRecord[] = [];
+  userTasks: TaskItem[] = [];
+  isLoading: boolean = false;
 
   // Make ApplicationStatus available to the template
   ApplicationStatus = ApplicationStatus;
 
-  // User role (would normally come from auth service)
-  currentUserRole: 'APPLICANT' | 'LP_SPECIALIST' | 'AGRICULTURE_MANAGER' | 'COO' = 'APPLICANT';
+  // User role from auth service
+  currentUserRole: string = 'Applicant';
+  currentUserName: string = '';
 
   // Filter options
   statusFilter: string = 'ALL';
@@ -29,131 +38,165 @@ export class ApplicationListComponent implements OnInit {
   totalItems: number = 0;
 
   // Status display mapping
-  statusDisplayMap = {
-    [ApplicationStatus.DRAFT]: 'Draft',
-    [ApplicationStatus.SUBMITTED]: 'Submitted',
-    [ApplicationStatus.IN_REVIEW]: 'In Review',
-    [ApplicationStatus.PENDING_LP_REVIEW]: 'Pending LP Review',
-    [ApplicationStatus.APPROVED_BY_LP]: 'Approved by LP',
-    [ApplicationStatus.REJECTED_BY_LP]: 'Rejected by LP',
-    [ApplicationStatus.PENDING_AGRICULTURE_REVIEW]: 'Pending Agriculture Review',
-    [ApplicationStatus.APPROVED_BY_AGRICULTURE]: 'Approved by Agriculture',
-    [ApplicationStatus.REJECTED_BY_AGRICULTURE]: 'Rejected by Agriculture',
-    [ApplicationStatus.PENDING_COO_REVIEW]: 'Pending COO Review',
-    [ApplicationStatus.APPROVED]: 'Approved',
-    [ApplicationStatus.REJECTED]: 'Rejected',
+  statusDisplayMap: { [key: string]: string } = {
+    DRAFT: 'Draft',
+    SUBMITTED: 'Submitted',
+    IN_REVIEW: 'In Review',
+    PENDING_LP_REVIEW: 'Pending LP Review',
+    APPROVED_BY_LP: 'Approved by LP',
+    REJECTED_BY_LP: 'Rejected by LP',
+    PENDING_AGRICULTURE_REVIEW: 'Pending Agriculture Review',
+    APPROVED_BY_AGRICULTURE: 'Approved by Agriculture',
+    REJECTED_BY_AGRICULTURE: 'Rejected by Agriculture',
+    PENDING_COO_REVIEW: 'Pending COO Review',
+    APPROVED: 'Approved',
+    REJECTED: 'Rejected',
   };
 
-  constructor(private router: Router, private applicationService: ApplicationService) {}
+  constructor(
+    private router: Router,
+    private applicationService: ApplicationService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
-    // In a real app, we would get the current user's role from an auth service
     this.getCurrentUserInfo();
     this.loadApplications();
   }
 
   getCurrentUserInfo(): void {
-    // This would normally come from an auth service
-    // For demo purposes, we'll just set a default role
-    this.currentUserRole = 'APPLICANT';
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser) {
+      this.currentUserRole = currentUser.role;
+      this.currentUserName = currentUser.name || currentUser.username;
+      console.log(`User authenticated as ${this.currentUserRole}: ${this.currentUserName}`);
+    }
   }
 
   loadApplications(): void {
-    this.applicationService.getApplications().subscribe(
-      applications => {
-        this.applications = applications;
-        this.applyFilters();
-      },
-      error => {
-        console.error('Error loading applications', error);
-      }
+    this.isLoading = true;
+
+    // Si el usuario es un revisador (LP Specialist, Agriculture Manager, COO), cargar solo sus aplicaciones asignadas
+    if (['LPSpecialist', 'Manager', 'COO'].includes(this.currentUserRole)) {
+      console.log(`Loading assigned applications for role: ${this.currentUserRole}`);
+      this.loadAssignedApplications();
+    } else {
+      // Para solicitantes u otros usuarios, cargar todas las aplicaciones
+      this.applicationService
+        .getApplications()
+        .pipe(finalize(() => (this.isLoading = false)))
+        .subscribe({
+          next: applications => {
+            this.applications = applications;
+            this.applyFilters();
+            // Also load tasks for the current user
+            this.loadUserTasks();
+          },
+          error: error => {
+            console.error('Error loading applications', error);
+          },
+        });
+    }
+  }
+
+  loadAssignedApplications(): void {
+    const currentUser = this.authService.getCurrentUser();
+    console.log(
+      `Fetching applications assigned to: ${currentUser?.name || currentUser?.username} (${
+        this.currentUserRole
+      })`
     );
+
+    this.applicationService
+      .getAssignedApplications(this.currentUserRole)
+      .pipe(finalize(() => (this.isLoading = false)))
+      .subscribe({
+        next: applications => {
+          console.log(
+            `Loaded ${applications.length} assigned applications for ${this.currentUserRole}`
+          );
+          this.applications = applications;
+          this.applyFilters();
+          // Also load tasks for the current user
+          this.loadUserTasks();
+        },
+        error: error => {
+          console.error('Error loading assigned applications', error);
+        },
+      });
+  }
+
+  loadUserTasks(): void {
+    this.applicationService.getUserTasks().subscribe({
+      next: tasks => {
+        this.userTasks = tasks;
+      },
+      error: error => {
+        console.error('Error loading user tasks', error);
+      },
+    });
   }
 
   createNewApplication(): void {
     this.router.navigate(['/application/new']);
   }
 
-  viewApplication(id: number): void {
-    this.router.navigate(['/application/detail', id]);
+  viewApplication(id: string): void {
+    this.router.navigate(['/application', id]);
   }
 
-  editApplication(id: number): void {
+  editApplication(id: string): void {
     this.router.navigate(['/application/edit', id]);
   }
 
-  deleteApplication(id: number): void {
+  deleteApplication(id: string): void {
     if (confirm('Are you sure you want to delete this application?')) {
-      this.applicationService.deleteApplication(id).subscribe(
-        () => {
-          this.loadApplications();
-        },
-        error => {
-          console.error('Error deleting application', error);
-        }
-      );
+      // In the real implementation, call the API to delete
+      this.applications = this.applications.filter(app => app.id !== id);
+      this.applyFilters();
     }
   }
 
-  reviewApplication(id: number): void {
+  reviewApplication(id: string): void {
     // Navigate to the appropriate review page based on user role
-    switch (this.currentUserRole) {
-      case 'LP_SPECIALIST':
-        this.router.navigate(['/application/review', id, 'specialist']);
-        break;
-      case 'AGRICULTURE_MANAGER':
-        this.router.navigate(['/application/review', id, 'manager']);
-        break;
-      case 'COO':
-        this.router.navigate(['/application/review', id, 'coo']);
-        break;
-      default:
-        this.viewApplication(id);
-    }
+    this.router.navigate(['/application/detail', id]);
   }
 
   applyFilters(): void {
     let filtered = [...this.applications];
 
-    // Filter by status
+    // Filter by status if not 'ALL'
     if (this.statusFilter !== 'ALL') {
       filtered = filtered.filter(app => app.status === this.statusFilter);
     }
 
-    // Filter by search term (application number or title)
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
+    // Filter by search term
+    if (this.searchTerm.trim()) {
+      const term = this.searchTerm.toLowerCase().trim();
       filtered = filtered.filter(
         app =>
           app.applicationNumber.toLowerCase().includes(term) ||
-          app.title.toLowerCase().includes(term) ||
-          app.applicant.name.toLowerCase().includes(term)
+          app.applicantName.toLowerCase().includes(term)
       );
     }
 
     // Sort by date
     filtered.sort((a, b) => {
-      const dateA = new Date(a.updatedAt).getTime();
-      const dateB = new Date(b.updatedAt).getTime();
+      const dateA = new Date(a.submissionDate || a.lastUpdated || '').getTime();
+      const dateB = new Date(b.submissionDate || b.lastUpdated || '').getTime();
       return this.dateFilter === 'newest' ? dateB - dateA : dateA - dateB;
     });
 
-    // Update pagination
+    this.filteredApplications = filtered;
     this.totalItems = filtered.length;
-
-    // Apply pagination
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    this.filteredApplications = filtered.slice(startIndex, startIndex + this.itemsPerPage);
   }
 
   onSearchChange(): void {
-    this.currentPage = 1;
     this.applyFilters();
   }
 
   onStatusFilterChange(status: string): void {
     this.statusFilter = status;
-    this.currentPage = 1;
     this.applyFilters();
   }
 
@@ -164,29 +207,29 @@ export class ApplicationListComponent implements OnInit {
 
   onPageChange(page: number): void {
     this.currentPage = page;
-    this.applyFilters();
   }
 
-  getStatusClass(status: ApplicationStatus): string {
+  getStatusClass(status: string): string {
     switch (status) {
-      case ApplicationStatus.DRAFT:
-        return 'status-draft';
-      case ApplicationStatus.SUBMITTED:
-      case ApplicationStatus.IN_REVIEW:
-      case ApplicationStatus.PENDING_LP_REVIEW:
-      case ApplicationStatus.PENDING_AGRICULTURE_REVIEW:
-      case ApplicationStatus.PENDING_COO_REVIEW:
-        return 'status-pending';
-      case ApplicationStatus.APPROVED:
-      case ApplicationStatus.APPROVED_BY_LP:
-      case ApplicationStatus.APPROVED_BY_AGRICULTURE:
-        return 'status-approved';
-      case ApplicationStatus.REJECTED:
-      case ApplicationStatus.REJECTED_BY_LP:
-      case ApplicationStatus.REJECTED_BY_AGRICULTURE:
-        return 'status-rejected';
+      case 'DRAFT':
+        return 'badge-secondary';
+      case 'SUBMITTED':
+        return 'badge-primary';
+      case 'IN_REVIEW':
+      case 'PENDING_LP_REVIEW':
+      case 'PENDING_AGRICULTURE_REVIEW':
+      case 'PENDING_COO_REVIEW':
+        return 'badge-info';
+      case 'APPROVED_BY_LP':
+      case 'APPROVED_BY_AGRICULTURE':
+      case 'APPROVED':
+        return 'badge-success';
+      case 'REJECTED_BY_LP':
+      case 'REJECTED_BY_AGRICULTURE':
+      case 'REJECTED':
+        return 'badge-danger';
       default:
-        return '';
+        return 'badge-secondary';
     }
   }
 
@@ -195,22 +238,35 @@ export class ApplicationListComponent implements OnInit {
   }
 
   get pages(): number[] {
-    const pageCount = this.totalPages;
-    const maxPagesToShow = 5;
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
 
-    if (pageCount <= maxPagesToShow) {
-      return Array.from({ length: pageCount }, (_, i) => i + 1);
+  get displayedApplications(): ApplicationRecord[] {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    return this.filteredApplications.slice(start, end);
+  }
+
+  // Helper method to get the count of applications awaiting user's review
+  getAssignedApplicationsCount(): number {
+    return this.applications.length;
+  }
+
+  // Helper method to determine if application can be reviewed by current user
+  canReviewApplication(app: ApplicationRecord): boolean {
+    if (this.currentUserRole === 'LPSpecialist' && app.status === 'PENDING_LP_REVIEW') {
+      return true;
     }
-
-    // Show pages around current page
-    let startPage = Math.max(1, this.currentPage - Math.floor(maxPagesToShow / 2));
-    let endPage = startPage + maxPagesToShow - 1;
-
-    if (endPage > pageCount) {
-      endPage = pageCount;
-      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    if (this.currentUserRole === 'Manager' && app.status === 'PENDING_AGRICULTURE_REVIEW') {
+      return true;
     }
+    if (this.currentUserRole === 'COO' && app.status === 'PENDING_COO_REVIEW') {
+      return true;
+    }
+    return false;
+  }
 
-    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+  getTaskForApplication(applicationId: string): TaskItem | undefined {
+    return this.userTasks.find(task => task.applicationId === applicationId);
   }
 }

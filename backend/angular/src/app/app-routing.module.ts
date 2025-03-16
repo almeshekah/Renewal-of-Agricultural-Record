@@ -6,11 +6,11 @@ import { AgriculturalRecordRenewalComponent } from './applications/components/ag
 
 const routes: Routes = [
   { path: '', component: LandingComponent },
-  { path: 'login', component: LoginComponent },
   {
     path: 'applications/agricultural-record-renewal',
     component: AgriculturalRecordRenewalComponent,
   },
+  { path: 'login', component: LoginComponent },
   {
     path: 'application',
     loadChildren: () => import('./application/application.module').then(m => m.ApplicationModule),

@@ -4,10 +4,15 @@
   <div class="applications-header">
     <div class="header-left">
       <h1>Agricultural Record Applications</h1>
-      <p class="subtitle">Manage and track your agricultural record applications</p>
+      <p class="subtitle">
+        Welcome, <strong>{{ currentUserName }}</strong> ({{ currentUserRole }})
+        <span *ngIf="currentUserRole !== 'APPLICANT'">
+          - {{ getAssignedApplicationsCount() }} applications awaiting your review
+        </span>
+      </p>
     </div>
     <div class="header-right">
-      <button class="btn-primary" (click)="createNewApplication()">
+      <button class="btn-primary" *ngIf="currentUserRole === 'APPLICANT'" (click)="createNewApplication()">
         <i class="fas fa-plus"></i> New Application
       </button>
     </div>
@@ -30,16 +35,16 @@
         <label>Status:</label>
         <select [(ngModel)]="statusFilter" (change)="onStatusFilterChange(statusFilter)">
           <option value="ALL">All Statuses</option>
-          <option [value]="ApplicationStatus.DRAFT">Draft</option>
+          <option *ngIf="currentUserRole === 'APPLICANT'" [value]="ApplicationStatus.DRAFT">Draft</option>
           <option [value]="ApplicationStatus.SUBMITTED">Submitted</option>
           <option [value]="ApplicationStatus.IN_REVIEW">In Review</option>
-          <option [value]="ApplicationStatus.PENDING_LP_REVIEW">Pending LP Review</option>
-          <option [value]="ApplicationStatus.APPROVED_BY_LP">Approved by LP</option>
-          <option [value]="ApplicationStatus.REJECTED_BY_LP">Rejected by LP</option>
-          <option [value]="ApplicationStatus.PENDING_AGRICULTURE_REVIEW">Pending Agriculture Review</option>
-          <option [value]="ApplicationStatus.APPROVED_BY_AGRICULTURE">Approved by Agriculture</option>
-          <option [value]="ApplicationStatus.REJECTED_BY_AGRICULTURE">Rejected by Agriculture</option>
-          <option [value]="ApplicationStatus.PENDING_COO_REVIEW">Pending COO Review</option>
+          <option *ngIf="currentUserRole === 'LP_SPECIALIST' || currentUserRole === 'APPLICANT'" [value]="ApplicationStatus.PENDING_LP_REVIEW">Pending LP Review</option>
+          <option *ngIf="currentUserRole === 'LP_SPECIALIST' || currentUserRole === 'APPLICANT'" [value]="ApplicationStatus.APPROVED_BY_LP">Approved by LP</option>
+          <option *ngIf="currentUserRole === 'LP_SPECIALIST' || currentUserRole === 'APPLICANT'" [value]="ApplicationStatus.REJECTED_BY_LP">Rejected by LP</option>
+          <option *ngIf="currentUserRole === 'AGRICULTURE_MANAGER' || currentUserRole === 'APPLICANT'" [value]="ApplicationStatus.PENDING_AGRICULTURE_REVIEW">Pending Agriculture Review</option>
+          <option *ngIf="currentUserRole === 'AGRICULTURE_MANAGER' || currentUserRole === 'APPLICANT'" [value]="ApplicationStatus.APPROVED_BY_AGRICULTURE">Approved by Agriculture</option>
+          <option *ngIf="currentUserRole === 'AGRICULTURE_MANAGER' || currentUserRole === 'APPLICANT'" [value]="ApplicationStatus.REJECTED_BY_AGRICULTURE">Rejected by Agriculture</option>
+          <option *ngIf="currentUserRole === 'COO' || currentUserRole === 'APPLICANT'" [value]="ApplicationStatus.PENDING_COO_REVIEW">Pending COO Review</option>
           <option [value]="ApplicationStatus.APPROVED">Approved</option>
           <option [value]="ApplicationStatus.REJECTED">Rejected</option>
         </select>
@@ -55,108 +60,88 @@
     </div>
   </div>
 
+  <!-- No applications message -->
+  <div class="no-applications" *ngIf="filteredApplications.length === 0 && !isLoading">
+    <div class="empty-state">
+      <i class="fas fa-clipboard-list"></i>
+      <h3>No Applications Found</h3>
+      <p *ngIf="currentUserRole === 'Applicant'">
+        You haven't created any applications yet. Click 'New Application' to get started.
+      </p>
+      <p *ngIf="currentUserRole === 'LPSpecialist'">
+        There are no applications pending your review at this time.
+      </p>
+      <p *ngIf="currentUserRole === 'Manager'">
+        There are no applications assigned to you for agricultural review at this time.
+      </p>
+      <p *ngIf="currentUserRole === 'COO'">
+        There are no applications waiting for your final review at this time.
+      </p>
+      <p *ngIf="!['Applicant', 'LPSpecialist', 'Manager', 'COO'].includes(currentUserRole)">
+        There are no applications assigned to you at this time.
+      </p>
+    </div>
+  </div>
+
+  <!-- Loading indicator -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+    </div>
+    <p>Loading applications...</p>
+  </div>
+
   <!-- Applications Table -->
-  <div class="applications-table">
-    <table *ngIf="filteredApplications.length > 0">
+  <div class="applications-table" *ngIf="filteredApplications.length > 0 && !isLoading">
+    <table>
       <thead>
         <tr>
           <th>Application #</th>
           <th>Title</th>
           <th>Applicant</th>
           <th>Status</th>
-          <th>Submitted Date</th>
-          <th>Last Updated</th>
-          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let app of filteredApplications">
+        <tr *ngFor="let app of displayedApplications"
+            (click)="viewApplication(app.id)"
+            class="application-row">
           <td>{{ app.applicationNumber }}</td>
           <td>{{ app.title }}</td>
-          <td>{{ app.applicant.name }}</td>
+          <td>{{ app.applicantName }}</td>
           <td>
             <span class="status-badge" [ngClass]="getStatusClass(app.status)">
               {{ statusDisplayMap[app.status] }}
             </span>
           </td>
-          <td>{{ app.submittedAt | date:'MMM d, y' }}</td>
-          <td>{{ app.updatedAt | date:'MMM d, y' }}</td>
-          <td class="actions-cell">
-            <button class="btn-icon" (click)="viewApplication(app.id)" title="View Details">
-              <i class="fas fa-eye"></i>
-            </button>
-
-            <button
-              *ngIf="app.status === ApplicationStatus.DRAFT"
-              class="btn-icon"
-              (click)="editApplication(app.id)"
-              title="Edit Application"
-            >
-              <i class="fas fa-edit"></i>
-            </button>
-
-            <button
-              *ngIf="app.status === ApplicationStatus.DRAFT"
-              class="btn-icon btn-delete"
-              (click)="deleteApplication(app.id)"
-              title="Delete Application"
-            >
-              <i class="fas fa-trash"></i>
-            </button>
-
-            <button
-              *ngIf="
-                (currentUserRole === 'LP_SPECIALIST' && app.status === ApplicationStatus.PENDING_LP_REVIEW) ||
-                (currentUserRole === 'AGRICULTURE_MANAGER' && app.status === ApplicationStatus.PENDING_AGRICULTURE_REVIEW) ||
-                (currentUserRole === 'COO' && app.status === ApplicationStatus.PENDING_COO_REVIEW)
-              "
-              class="btn-icon btn-review"
-              (click)="reviewApplication(app.id)"
-              title="Review Application"
-            >
-              <i class="fas fa-clipboard-check"></i>
-            </button>
-          </td>
         </tr>
       </tbody>
     </table>
 
-    <!-- Empty state -->
-    <div class="empty-state" *ngIf="filteredApplications.length === 0">
-      <div class="empty-icon">
-        <i class="fas fa-file-alt"></i>
-      </div>
-      <h3>No applications found</h3>
-      <p>There are no applications matching your current filters.</p>
-      <button class="btn-secondary" (click)="onStatusFilterChange('ALL')">Clear Filters</button>
-    </div>
-  </div>
-
   <!-- Pagination -->
   <div class="pagination" *ngIf="totalPages > 1">
     <button
-      class="page-btn"
+        class="page-item"
       [disabled]="currentPage === 1"
       (click)="onPageChange(currentPage - 1)"
     >
       <i class="fas fa-chevron-left"></i>
     </button>
-
     <button
       *ngFor="let page of pages"
-      class="page-btn"
+        class="page-item"
       [class.active]="page === currentPage"
       (click)="onPageChange(page)"
     >
       {{ page }}
     </button>
-
     <button
-      class="page-btn"
+        class="page-item"
       [disabled]="currentPage === totalPages"
       (click)="onPageChange(currentPage + 1)"
     >
       <i class="fas fa-chevron-right"></i>
     </button>
+    </div>
   </div>
 </div>

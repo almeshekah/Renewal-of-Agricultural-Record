@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AgriculturalRecordRenewal.Application.Contracts\AgriculturalRecordRenewal.Application.Contracts.csproj" />
+    <ProjectReference Include="..\AgriculturalRecordRenewal.Domain\AgriculturalRecordRenewal.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +20,7 @@
     <PackageReference Include="Volo.Abp.TenantManagement.HttpApi" Version="9.1.0" />
     <PackageReference Include="Volo.Abp.FeatureManagement.HttpApi" Version="9.1.0" />
     <PackageReference Include="Volo.Abp.SettingManagement.HttpApi" Version="9.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

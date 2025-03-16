@@ -1,7 +1,7 @@
 import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { HttpClientModule, HttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { environment } from '../environments/environment';
 import { CoreModule as AbpCoreModule, NAVIGATE_TO_MANAGE_PROFILE } from '@abp/ng.core';
@@ -20,6 +20,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { APP_ROUTE_PROVIDER } from './route.provider';
 import { MENU_PROVIDERS } from './providers/menu-items.provider';
+import { AuthInterceptor } from './auth/interceptors/auth.interceptor';
 
 // Feature Modules
 import { SharedModule } from './shared/shared.module';
@@ -99,6 +100,11 @@ const LOGON_X_MODULES = [
         console.log('Navigate to manage profile called');
         return Promise.resolve();
       },
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true,
     },
   ],
   bootstrap: [AppComponent],

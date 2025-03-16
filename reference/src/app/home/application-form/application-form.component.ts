@@ -69,12 +69,9 @@ export class ApplicationFormComponent implements OnInit {
 			// Personal Information (Step 1)
 			personalInfo: this.fb.group({
 				fullName: ['', [Validators.required]],
-				nationalId: ['', [Validators.required, Validators.minLength(10)]],
-				email: ['', [Validators.required, Validators.email]],
-				mobile: [
-					'',
-					[Validators.required, Validators.pattern(/^(9665|05)\d{8}$/)],
-				],
+				nationalId: ['', [Validators.required]],
+				email: ['', [Validators.required]],
+				mobile: ['', [Validators.required]],
 				address: ['', Validators.required],
 			}),
 

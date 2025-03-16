@@ -12,15 +12,15 @@ public class AgriculturalRecordRenewalDbContextFactory : IDesignTimeDbContextFac
 {
     public AgriculturalRecordRenewalDbContext CreateDbContext(string[] args)
     {
-        // Fix DateTime UTC conversion issues with PostgreSQL
-        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+        // Not needed for SQLite
+        // AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         
         AgriculturalRecordRenewalEfCoreEntityExtensionMappings.Configure();
 
         var configuration = BuildConfiguration();
 
         var builder = new DbContextOptionsBuilder<AgriculturalRecordRenewalDbContext>()
-            .UseNpgsql(configuration.GetConnectionString("Default"));
+            .UseSqlite(configuration.GetConnectionString("Default"));
 
         return new AgriculturalRecordRenewalDbContext(builder.Options);
     }

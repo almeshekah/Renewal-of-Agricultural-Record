@@ -1,113 +1,126 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
-import { ApplicationStatus } from '../models/application.model';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
+
+export interface ProcessInstance {
+  id: string;
+  processDefinitionId: string;
+  businessKey: string;
+  status: string;
+}
+
+export interface Task {
+  id: string;
+  name: string;
+  description?: string;
+  assignee?: string;
+  created?: string;
+  dueDate?: string;
+  processInstanceId: string;
+  taskDefinitionKey: string;
+  formKey?: string;
+}
+
+export interface TaskList {
+  tasks: Task[];
+}
+
+export interface StartProcessParams {
+  applicationId: string;
+  applicantId: string;
+  processDefinitionKey: string;
+  fullName?: string;
+  email?: string;
+  mobileNumber?: string;
+  address?: string;
+  farmLocation?: string;
+}
+
+export interface CompleteTaskParams {
+  decision: string;
+  comment?: string;
+  userId: string;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class WorkflowService {
-  constructor() {}
+  private apiUrl = `${environment.apiUrl}/workflow`;
 
-  // Simulates waiting for the action to complete
-  simulateProcessing(message: string, duration: number = 1500): Observable<string> {
-    return of(message).pipe(delay(duration));
+  constructor(private http: HttpClient) {}
+
+  startProcess(params: StartProcessParams): Observable<ProcessInstance> {
+    const url = `${this.apiUrl}/start`;
+
+    // Create the request in the format expected by the backend
+    const body = {
+      applicationId: params.applicationId,
+      applicantId: params.applicantId,
+      processDefinitionKey: params.processDefinitionKey,
+      fullName: params.fullName,
+      email: params.email,
+      mobileNumber: params.mobileNumber,
+      address: params.address,
+      farmLocation: params.farmLocation,
+    };
+
+    console.log('Starting process with params:', body);
+
+    return this.http.post<ProcessInstance>(url, body).pipe(catchError(this.handleError));
   }
 
-  // Gets the next status based on the current status and action
-  getNextStatus(
-    currentStatus: ApplicationStatus,
-    action:
-      | 'SUBMIT'
-      | 'SEND_TO_LP'
-      | 'APPROVE_LP'
-      | 'SEND_TO_MANAGER'
-      | 'APPROVE_MANAGER'
-      | 'SEND_TO_COO'
-      | 'APPROVE_COO'
-      | 'REJECT'
-      | 'RETURN'
-  ): ApplicationStatus {
-    switch (action) {
-      case 'SUBMIT':
-        return ApplicationStatus.SUBMITTED;
-      case 'SEND_TO_LP':
-        return ApplicationStatus.PENDING_LP_REVIEW;
-      case 'APPROVE_LP':
-        return ApplicationStatus.APPROVED_BY_LP;
-      case 'SEND_TO_MANAGER':
-        return ApplicationStatus.PENDING_AGRICULTURE_REVIEW;
-      case 'APPROVE_MANAGER':
-        return ApplicationStatus.APPROVED_BY_AGRICULTURE;
-      case 'SEND_TO_COO':
-        return ApplicationStatus.PENDING_COO_REVIEW;
-      case 'APPROVE_COO':
-        return ApplicationStatus.APPROVED;
-      case 'REJECT':
-        if (currentStatus === ApplicationStatus.PENDING_LP_REVIEW) {
-          return ApplicationStatus.REJECTED_BY_LP;
-        } else if (currentStatus === ApplicationStatus.PENDING_AGRICULTURE_REVIEW) {
-          return ApplicationStatus.REJECTED_BY_AGRICULTURE;
-        } else {
-          return ApplicationStatus.REJECTED;
-        }
-      case 'RETURN':
-        // Return to previous step
-        if (currentStatus === ApplicationStatus.PENDING_LP_REVIEW) {
-          return ApplicationStatus.SUBMITTED;
-        } else if (currentStatus === ApplicationStatus.PENDING_AGRICULTURE_REVIEW) {
-          return ApplicationStatus.APPROVED_BY_LP;
-        } else if (currentStatus === ApplicationStatus.PENDING_COO_REVIEW) {
-          return ApplicationStatus.APPROVED_BY_AGRICULTURE;
-        } else {
-          return currentStatus;
-        }
-      default:
-        return currentStatus;
-    }
+  getTasksByAssignee(assignee: string): Observable<TaskList> {
+    const url = `${this.apiUrl}/tasks/assignee/${assignee}`;
+    return this.http.get<TaskList>(url).pipe(catchError(this.handleError));
   }
 
-  // Determines if a user with a given role can perform an action on an application in the given status
-  canPerformAction(
-    status: ApplicationStatus,
-    role: 'APPLICANT' | 'LP_SPECIALIST' | 'AGRICULTURE_MANAGER' | 'COO',
-    action:
-      | 'SUBMIT'
-      | 'SEND_TO_LP'
-      | 'APPROVE_LP'
-      | 'REJECT_LP'
-      | 'SEND_TO_MANAGER'
-      | 'APPROVE_MANAGER'
-      | 'REJECT_MANAGER'
-      | 'SEND_TO_COO'
-      | 'APPROVE_COO'
-      | 'REJECT_COO'
-  ): boolean {
-    switch (role) {
-      case 'APPLICANT':
-        return action === 'SUBMIT' && status === ApplicationStatus.DRAFT;
+  getTasksByApplicationId(applicationId: string): Observable<TaskList> {
+    const url = `${this.apiUrl}/tasks/application/${applicationId}`;
+    return this.http.get<TaskList>(url).pipe(catchError(this.handleError));
+  }
 
-      case 'LP_SPECIALIST':
-        return (
-          (action === 'APPROVE_LP' && status === ApplicationStatus.PENDING_LP_REVIEW) ||
-          (action === 'REJECT_LP' && status === ApplicationStatus.PENDING_LP_REVIEW)
-        );
+  completeTask(taskId: string, params: CompleteTaskParams): Observable<Task> {
+    const url = `${this.apiUrl}/tasks/${taskId}/complete`;
+    return this.http.post<Task>(url, params).pipe(catchError(this.handleError));
+  }
 
-      case 'AGRICULTURE_MANAGER':
-        return (
-          (action === 'APPROVE_MANAGER' &&
-            status === ApplicationStatus.PENDING_AGRICULTURE_REVIEW) ||
-          (action === 'REJECT_MANAGER' && status === ApplicationStatus.PENDING_AGRICULTURE_REVIEW)
-        );
+  getCurrentTask(processInstanceId: string): Observable<Task> {
+    const url = `${this.apiUrl}/tasks/current/${processInstanceId}`;
+    return this.http.get<Task>(url).pipe(catchError(this.handleError));
+  }
 
-      case 'COO':
-        return (
-          (action === 'APPROVE_COO' && status === ApplicationStatus.PENDING_COO_REVIEW) ||
-          (action === 'REJECT_COO' && status === ApplicationStatus.PENDING_COO_REVIEW)
-        );
+  addComment(taskId: string, userId: string, message: string): Observable<void> {
+    const url = `${this.apiUrl}/tasks/${taskId}/comments`;
+    return this.http.post<void>(url, message).pipe(catchError(this.handleError));
+  }
 
-      default:
-        return false;
+  private handleError(error: any) {
+    let errorMessage = '';
+
+    if (error.status === 0) {
+      // A client-side or network error occurred
+      errorMessage =
+        'An error occurred: Could not connect to the server. Please check your network connection.';
+    } else if (error.error instanceof ErrorEvent) {
+      // A client-side error occurred
+      errorMessage = `Error: ${error.error.message}`;
+    } else if (error.status === 404) {
+      // 404 Not Found
+      errorMessage = 'Error: The requested resource was not found.';
+    } else if (error.status === 405) {
+      // 405 Method Not Allowed
+      errorMessage = 'Error: The requested operation is not supported.';
+    } else {
+      // The backend returned an unsuccessful response code
+      errorMessage = `Error Code: ${error.status}, Message: ${
+        error.error.message || error.statusText
+      }`;
     }
+
+    console.error('Workflow service error:', errorMessage);
+    return throwError(() => errorMessage);
   }
 }

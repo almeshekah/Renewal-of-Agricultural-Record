@@ -16,36 +16,38 @@ export enum ApplicationStatus {
 export type ApplicationStatusType = keyof typeof ApplicationStatus;
 
 export interface Applicant {
-  id: number;
+  id: string;
   name: string;
+  nationalId?: string;
   email: string;
   phone: string;
-  nationalId: string;
-  address: string;
+  address?: string;
 }
 
 export interface ApplicationDocument {
   id: number;
-  name: string;
   type: string;
-  url: string;
-  uploadedAt: Date;
+  name: string;
+  size: number;
+  contentType: string;
+  uploadDate: string;
+  content?: File;
 }
 
 export interface ApplicationComment {
   id?: number;
-  userId: number;
+  userId: string;
   userName: string;
   text: string;
   timestamp: string;
 }
 
 export interface FarmLocation {
-  latitude: number;
-  longitude: number;
   address: string;
-  size: number;
-  crops: string[];
+  size?: number;
+  crops?: string[];
+  hasIrrigationSystem?: boolean;
+  region?: string;
 }
 
 export interface Review {
@@ -57,16 +59,27 @@ export interface Review {
   timestamp: string;
 }
 
+export interface PreviousLicense {
+  number: string;
+  issueDate: string;
+  expiryDate: string;
+  activityType?: string;
+}
+
 export interface Application {
-  id: number;
+  id: string;
   applicationNumber: string;
   title: string;
   applicant: Applicant;
-  farmLocation: FarmLocation;
-  documents: ApplicationDocument[];
+  farmLocation?: FarmLocation;
+  address?: string;
+  recordType?: string;
+  previousLicense?: PreviousLicense;
+  documents?: ApplicationDocument[];
   status: ApplicationStatus;
-  submittedAt: Date;
-  updatedAt: Date;
-  comments: ApplicationComment[];
-  reviews: Review[];
+  submissionDate: string | null;
+  processInstanceId?: string;
+  updatedAt: string | Date;
+  comments?: ApplicationComment[];
+  reviews?: Review[];
 }

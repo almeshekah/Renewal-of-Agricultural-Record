@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 
@@ -14,18 +14,31 @@ export class LoginComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
   showPassword = false;
+  returnUrl: string = '/application';
 
-  constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {}
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
     this.initForm();
+
+    // Get return url from route parameters or default to '/application'
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/application';
+
+    // Redirect if already logged in
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate([this.returnUrl]);
+    }
   }
 
   private initForm(): void {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required]],
       password: ['', [Validators.required]],
-      rememberMe: [false],
     });
   }
 
@@ -48,27 +61,13 @@ export class LoginComponent implements OnInit {
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
         next: user => {
-          // Store auth token or user data
-          localStorage.setItem('isLoggedIn', 'true');
-          localStorage.setItem('currentUser', JSON.stringify(user));
-
-          // Redirect based on user role
-          switch (user.role) {
-            case 'applicant':
-              this.router.navigateByUrl('/application/list');
-              break;
-            case 'lp-specialist':
-            case 'agriculture-manager':
-            case 'coo':
-              // Redirect all reviewers to the applications list
-              this.router.navigateByUrl('/application/list');
-              break;
-            default:
-              this.router.navigateByUrl('/');
-          }
+          console.log('Login successful:', user);
+          // Navigate to the return URL
+          this.router.navigateByUrl('/application');
         },
         error: err => {
-          this.errorMessage = err.message || 'Login failed. Please try again.';
+          console.error('Login error:', err);
+          this.errorMessage = err.message || 'Invalid username or password';
         },
       });
   }

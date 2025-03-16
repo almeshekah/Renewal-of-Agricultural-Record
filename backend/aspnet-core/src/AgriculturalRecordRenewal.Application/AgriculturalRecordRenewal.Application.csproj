@@ -14,6 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Camunda.Api.Client" Version="2.6.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.3" />
     <PackageReference Include="Volo.Abp.Account.Application" Version="9.1.0" />
     <PackageReference Include="Volo.Abp.Identity.Application" Version="9.1.0" />
     <PackageReference Include="Volo.Abp.PermissionManagement.Application" Version="9.1.0" />
