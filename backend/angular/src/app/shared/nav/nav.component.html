@@ -1,6 +1,6 @@
 <nav class="sidebar">
   <div class="sidebar-header">
-    <h3>Agricultural App</h3>
+    <h3>AlUla Services</h3>
   </div>
 
   <ul class="list-unstyled components">
@@ -14,11 +14,17 @@
         <i class="bi bi-file-earmark-text"></i> Applications
       </a>
     </li>
-    <li>
+    <!-- <li>
       <a [routerLink]="['/home/services']" routerLinkActive="active">
         <i class="bi bi-grid"></i> Agricultural E-Services
       </a>
-    </li>
+    </li> -->
+    <!-- Admin Only Links -->
+    <!-- <li *ngIf="userRole === 'admin'">
+      <a [routerLink]="['/admin/email-test']" routerLinkActive="active">
+        <i class="bi bi-envelope-check"></i> Email Test
+      </a>
+    </li> -->
   </ul>
 
   <!-- User Profile Section -->

@@ -1,0 +1,169 @@
+<div class="email-test-container">
+  <div class="card">
+    <div class="card-header">
+      <h2>أداة اختبار إعدادات البريد الإلكتروني</h2>
+      <p>استخدم هذه الأداة للتحقق من إعدادات البريد الإلكتروني وإرسال بريد تجريبي</p>
+    </div>
+
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="email-settings">
+            <h3>إعدادات البريد الإلكتروني الحالية</h3>
+
+            <div class="loading-indicator" *ngIf="isLoading">
+              <i class="fas fa-spinner fa-spin"></i> جاري تحميل الإعدادات...
+            </div>
+
+            <div class="alert alert-info" *ngIf="!isLoading && (!emailSettings || Object.keys(emailSettings).length === 0)">
+              لم يتم العثور على إعدادات للبريد الإلكتروني
+            </div>
+
+            <div class="settings-table" *ngIf="!isLoading && emailSettings && Object.keys(emailSettings).length > 0">
+              <h4>إعدادات من مزود الإعدادات:</h4>
+              <table class="table table-striped">
+                <tr>
+                  <th>Host</th>
+                  <td>{{ emailSettings['SettingProvider:Host'] || 'غير محدد' }}</td>
+                </tr>
+                <tr>
+                  <th>Port</th>
+                  <td>{{ emailSettings['SettingProvider:Port'] || 'غير محدد' }}</td>
+                </tr>
+                <tr>
+                  <th>UserName</th>
+                  <td>{{ emailSettings['SettingProvider:UserName'] || 'غير محدد' }}</td>
+                </tr>
+                <tr>
+                  <th>EnableSsl</th>
+                  <td>{{ emailSettings['SettingProvider:EnableSsl'] || 'غير محدد' }}</td>
+                </tr>
+                <tr>
+                  <th>DefaultFromAddress</th>
+                  <td>{{ emailSettings['SettingProvider:DefaultFromAddress'] || 'غير محدد' }}</td>
+                </tr>
+                <tr>
+                  <th>DefaultFromDisplayName</th>
+                  <td>{{ emailSettings['SettingProvider:DefaultFromDisplayName'] || 'غير محدد' }}</td>
+                </tr>
+              </table>
+
+              <h4>إعدادات من ملف التكوين:</h4>
+              <table class="table table-striped">
+                <tr>
+                  <th>Host</th>
+                  <td>{{ emailSettings['Configuration:Host'] || 'غير محدد' }}</td>
+                </tr>
+                <tr>
+                  <th>Port</th>
+                  <td>{{ emailSettings['Configuration:Port'] || 'غير محدد' }}</td>
+                </tr>
+                <tr>
+                  <th>UserName</th>
+                  <td>{{ emailSettings['Configuration:UserName'] || 'غير محدد' }}</td>
+                </tr>
+                <tr>
+                  <th>EnableSsl</th>
+                  <td>{{ emailSettings['Configuration:EnableSsl'] || 'غير محدد' }}</td>
+                </tr>
+                <tr>
+                  <th>DefaultFromAddress</th>
+                  <td>{{ emailSettings['Configuration:DefaultFromAddress'] || 'غير محدد' }}</td>
+                </tr>
+                <tr>
+                  <th>DefaultFromDisplayName</th>
+                  <td>{{ emailSettings['Configuration:DefaultFromDisplayName'] || 'غير محدد' }}</td>
+                </tr>
+              </table>
+
+              <div class="alert alert-warning" *ngIf="emailSettings['SettingProvider:Host'] !== emailSettings['Configuration:Host'] ||
+                                                        emailSettings['SettingProvider:Port'] !== emailSettings['Configuration:Port'] ||
+                                                        emailSettings['SettingProvider:UserName'] !== emailSettings['Configuration:UserName']">
+                <i class="fas fa-exclamation-triangle"></i> تحذير: هناك اختلافات بين إعدادات مزود الإعدادات وملف التكوين
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="email-test-form">
+            <h3>إرسال بريد إلكتروني تجريبي</h3>
+
+            <form [formGroup]="emailForm" (ngSubmit)="sendTestEmail()">
+              <div class="form-group">
+                <label for="emailTo">البريد الإلكتروني للمستلم*</label>
+                <input
+                  type="email"
+                  id="emailTo"
+                  formControlName="to"
+                  class="form-control"
+                  [ngClass]="{'is-invalid': emailForm.get('to')?.invalid && emailForm.get('to')?.touched}"
+                  placeholder="example@example.com"
+                >
+                <div class="invalid-feedback" *ngIf="emailForm.get('to')?.invalid && emailForm.get('to')?.touched">
+                  يرجى إدخال عنوان بريد إلكتروني صالح
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="emailSubject">موضوع البريد</label>
+                <input
+                  type="text"
+                  id="emailSubject"
+                  formControlName="subject"
+                  class="form-control"
+                  placeholder="موضوع البريد الإلكتروني"
+                >
+              </div>
+
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="emailForm.invalid || isLoading"
+              >
+                <i class="fas fa-paper-plane"></i>
+                <span *ngIf="!isLoading">إرسال بريد تجريبي</span>
+                <span *ngIf="isLoading">جاري الإرسال...</span>
+              </button>
+            </form>
+
+            <div class="result-container mt-4" *ngIf="testResult">
+              <div class="alert" [ngClass]="testResult.success ? 'alert-success' : 'alert-danger'">
+                <i class="fas" [ngClass]="testResult.success ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                {{ testResult.message }}
+              </div>
+
+              <div *ngIf="!testResult.success && testResult.error">
+                <div class="error-details">
+                  <h5>تفاصيل الخطأ:</h5>
+                  <div class="alert alert-danger">
+                    <p><strong>رسالة الخطأ:</strong> {{ testResult.error.error }}</p>
+                    <p *ngIf="testResult.error.innerError"><strong>الخطأ الداخلي:</strong> {{ testResult.error.innerError }}</p>
+                  </div>
+
+                  <div class="stack-trace" *ngIf="testResult.error.stackTrace">
+                    <strong>تتبع المكدس:</strong>
+                    <pre>{{ testResult.error.stackTrace }}</pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <div class="additional-info">
+        <h3>معلومات مفيدة لتصحيح مشاكل البريد الإلكتروني</h3>
+        <ul>
+          <li>تأكد من أن إعدادات SMTP صحيحة (الخادم، المنفذ، اسم المستخدم، كلمة المرور)</li>
+          <li>إذا كنت تستخدم جوجل ميل، تأكد من إنشاء كلمة مرور للتطبيق وليس كلمة مرور الحساب العادية</li>
+          <li>تأكد من تفعيل SSL إذا كان الخادم يتطلب ذلك</li>
+          <li>تحقق من جدار الحماية وإعدادات الشبكة للتأكد من السماح بالاتصال</li>
+          <li>راجع سجلات التطبيق لمزيد من التفاصيل عن الأخطاء</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

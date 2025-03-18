@@ -133,7 +133,7 @@ export class ApplicationDetailsComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/application/list']);
+    this.router.navigate(['/application']);
   }
 
   getStepClass(stepIndex: number): string {

@@ -241,7 +241,18 @@ namespace AgriculturalRecordRenewal.Workflow
                             application.Status = "APPROVED";
                             
                             // إرسال بريد إلكتروني بالرخصة الجديدة بعد موافقة الرئيس التنفيذي للعمليات
-                            await SendApprovalEmailWithLicenseAsync(application);
+                            try 
+                            {
+                                _logger.LogInformation($"COO approved application {applicationId}. Sending approval email...");
+                                await SendApprovalEmailWithLicenseAsync(application);
+                            }
+                            catch (Exception emailEx)
+                            {
+                                // تسجيل الخطأ ولكن السماح بالاستمرار
+                                _logger.LogError(emailEx, $"Failed to send email during COO task completion for application {applicationId}. Will retry later.");
+                                
+                                // نحتفظ بحالة الطلب APPROVED كما هي
+                            }
                         }
                         else if (input.Decision == "REJECT")
                         {
@@ -381,7 +392,41 @@ namespace AgriculturalRecordRenewal.Workflow
                 case COO_FINAL_REVIEW:
                     // This is the final task, no need to create a new task
                     _logger.LogInformation($"Workflow completed for process {completedTask.ProcessInstanceId} with decision {decision}");
+                    
+                    if (decision == "APPROVE")
+                    {
+                        // التحقق من أن البريد الإلكتروني تم إرساله بنجاح
+                        await CheckAndRetrySendingEmailAsync(completedTask.ProcessInstanceId);
+                    }
                     break;
+            }
+        }
+        
+        // دالة للتحقق من حالة إرسال البريد الإلكتروني وإعادة المحاولة إذا لزم الأمر
+        private async Task CheckAndRetrySendingEmailAsync(string processInstanceId)
+        {
+            try
+            {
+                // التحقق من وجود الطلب
+                Guid appGuid;
+                if (!Guid.TryParse(processInstanceId, out appGuid))
+                {
+                    _logger.LogWarning($"Invalid process ID format for email check: {processInstanceId}");
+                    return;
+                }
+                
+                var application = await _applicationRepository.GetAsync(appGuid);
+                
+                // التحقق من حالة الطلب وإرسال البريد الإلكتروني إذا كان معتمداً
+                if (application.Status == "APPROVED")
+                {
+                    _logger.LogInformation($"Application {processInstanceId} is approved. Sending email...");
+                    await SendApprovalEmailWithLicenseAsync(application);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error checking or retrying email for process {processInstanceId}: {ex.Message}");
             }
         }
 
@@ -472,41 +517,41 @@ namespace AgriculturalRecordRenewal.Workflow
                 _logger.LogInformation($"License details - Number: {licenseNumber}, Issue Date: {issueDate}, Expiry Date: {expiryDate}");
                 
                 // بناء محتوى البريد الإلكتروني
-                var subject = "Agricultural Record Renewal Approved";
+                var subject = "الموافقة على تجديد السجل الزراعي";
                 var body = new StringBuilder();
                 body.AppendLine("<html><body style='font-family: Arial, sans-serif;'>");
                 body.AppendLine("<div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;'>");
                 body.AppendLine("<div style='text-align: center; margin-bottom: 20px;'>");
-                body.AppendLine("<h1 style='color: #2b5797;'>Agricultural Record Approval</h1>");
+                body.AppendLine("<h1 style='color: #2b5797;'>الموافقة على السجل الزراعي</h1>");
                 body.AppendLine("</div>");
                 
-                body.AppendLine("<p>Dear " + recipientName + ",</p>");
-                body.AppendLine("<p>We are pleased to inform you that your application for the renewal of your Agricultural Record has been <strong style='color: green;'>approved</strong>.</p>");
+                body.AppendLine("<p>عزيزي " + recipientName + "،</p>");
+                body.AppendLine("<p>يسرنا إبلاغكم بأن طلبكم لتجديد السجل الزراعي قد تمت <strong style='color: green;'>الموافقة</strong> عليه.</p>");
                 
                 body.AppendLine("<div style='background-color: #f9f9f9; border: 1px solid #eee; padding: 15px; margin: 20px 0; border-radius: 5px;'>");
-                body.AppendLine("<h2 style='color: #2b5797; margin-top: 0;'>New License Details</h2>");
+                body.AppendLine("<h2 style='color: #2b5797; margin-top: 0;'>تفاصيل الرخصة الجديدة</h2>");
                 
                 body.AppendLine("<table style='width: 100%; border-collapse: collapse;'>");
-                body.AppendLine("<tr><td style='padding: 8px; font-weight: bold;'>License Number:</td><td style='padding: 8px;'>" + licenseNumber + "</td></tr>");
-                body.AppendLine("<tr><td style='padding: 8px; font-weight: bold;'>Owner Name:</td><td style='padding: 8px;'>" + application.ApplicantName + "</td></tr>");
-                body.AppendLine("<tr><td style='padding: 8px; font-weight: bold;'>Farm Location:</td><td style='padding: 8px;'>" + application.FarmLocation + "</td></tr>");
-                body.AppendLine("<tr><td style='padding: 8px; font-weight: bold;'>Issue Date:</td><td style='padding: 8px;'>" + issueDate.ToString("dd MMM yyyy") + "</td></tr>");
-                body.AppendLine("<tr><td style='padding: 8px; font-weight: bold;'>Expiry Date:</td><td style='padding: 8px;'>" + expiryDate.ToString("dd MMM yyyy") + "</td></tr>");
-                body.AppendLine("<tr><td style='padding: 8px; font-weight: bold;'>License Type:</td><td style='padding: 8px;'>Agricultural Record</td></tr>");
+                body.AppendLine("<tr><td style='padding: 8px; font-weight: bold;'>رقم الرخصة:</td><td style='padding: 8px;'>" + licenseNumber + "</td></tr>");
+                body.AppendLine("<tr><td style='padding: 8px; font-weight: bold;'>اسم المالك:</td><td style='padding: 8px;'>" + application.ApplicantName + "</td></tr>");
+                body.AppendLine("<tr><td style='padding: 8px; font-weight: bold;'>موقع المزرعة:</td><td style='padding: 8px;'>" + application.FarmLocation + "</td></tr>");
+                body.AppendLine("<tr><td style='padding: 8px; font-weight: bold;'>تاريخ الإصدار:</td><td style='padding: 8px;'>" + issueDate.ToString("dd MMM yyyy") + "</td></tr>");
+                body.AppendLine("<tr><td style='padding: 8px; font-weight: bold;'>تاريخ الانتهاء:</td><td style='padding: 8px;'>" + expiryDate.ToString("dd MMM yyyy") + "</td></tr>");
+                body.AppendLine("<tr><td style='padding: 8px; font-weight: bold;'>نوع الرخصة:</td><td style='padding: 8px;'>السجل الزراعي</td></tr>");
                 body.AppendLine("</table>");
                 body.AppendLine("</div>");
                 
-                body.AppendLine("<p>Please keep this email for your records. A physical copy of your license will be sent to your registered address shortly.</p>");
-                body.AppendLine("<p>If you have any questions, please contact our support team.</p>");
+                body.AppendLine("<p>يرجى الاحتفاظ بهذا البريد الإلكتروني للرجوع إليه. سيتم إرسال نسخة مطبوعة من الرخصة إلى عنوانك المسجل قريبًا.</p>");
+                body.AppendLine("<p>إذا كان لديك أي أسئلة، يرجى الاتصال بفريق الدعم لدينا.</p>");
                 
-                body.AppendLine("<p>Thank you,<br>Agricultural Department</p>");
+                body.AppendLine("<p>شكرا لك،<br>قسم الزراعة</p>");
                 body.AppendLine("</div>");
                 body.AppendLine("</body></html>");
                 
                 // سجل محاولة إرسال البريد الإلكتروني
                 _logger.LogInformation($"Attempting to send email to {recipientEmail} with subject: {subject}");
                 
-                try
+                try 
                 {
                     // إرسال البريد الإلكتروني بشكل مباشر للتحقق من الاستجابة
                     await _emailSender.SendAsync(
@@ -516,19 +561,17 @@ namespace AgriculturalRecordRenewal.Workflow
                         isBodyHtml: true
                     );
                     
-                    _logger.LogInformation($"Approval email with license details successfully sent to {recipientEmail}");
+                    _logger.LogInformation($"Successfully sent approval email to {recipientEmail}");
                     
-                    // تحديث حالة التطبيق فقط
-                    application.Status = $"APPROVED_EMAIL_SENT";
-                    await _applicationRepository.UpdateAsync(application);
+                    // لا نقوم بتغيير حالة التطبيق هنا حسب طلب المستخدم
                 }
                 catch (Exception emailEx)
                 {
-                    _logger.LogWarning(emailEx, $"First attempt to send email failed. Trying alternative method. Error: {emailEx.Message}");
+                    _logger.LogError(emailEx, $"First attempt to send email failed. Trying alternative method. Error: {emailEx.Message}");
                     
                     if (emailEx.InnerException != null)
                     {
-                        _logger.LogWarning($"Inner exception: {emailEx.InnerException.Message}");
+                        _logger.LogError($"Inner exception: {emailEx.InnerException.Message}");
                     }
                     
                     // محاولة إرسال بريد بطريقة بديلة
@@ -544,8 +587,6 @@ namespace AgriculturalRecordRenewal.Workflow
                 {
                     _logger.LogError($"Inner exception: {ex.InnerException.Message}");
                 }
-                
-                // لا نقوم بتحديث سجل خاصية Notes لأنها غير موجودة
             }
         }
         
@@ -571,17 +612,46 @@ namespace AgriculturalRecordRenewal.Workflow
                 // عبر طريقة محجوزة للسجلات
                 _logger.LogInformation($"Email details stored for later sending - To: {to}, Subject: {subject}");
                 
-                // تحديث التطبيق لتتبع المشكلة - نستخدم حقل Status بدلاً من Notes
-                var application = await _applicationRepository.GetAsync(applicationId);
-                if (application != null)
-                {
-                    application.Status = "APPROVED_EMAIL_PENDING";
-                    await _applicationRepository.UpdateAsync(application);
-                }
+                // لا نقوم بتحديث الطلب حسب طلب المستخدم
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Alternative email sending method also failed.");
+            }
+        }
+
+        // دالة لمعالجة البريد الإلكتروني للطلبات المعتمدة
+        public async Task ProcessPendingEmailsAsync()
+        {
+            try
+            {
+                _logger.LogInformation("Starting to process emails for approved applications...");
+                
+                // البحث عن الطلبات المعتمدة التي تحتاج لإرسال بريد إلكتروني
+                var approvedApplications = await _applicationRepository.GetListAsync(
+                    a => a.Status == "APPROVED"
+                );
+                
+                _logger.LogInformation($"Found {approvedApplications.Count} approved applications");
+                
+                foreach (var application in approvedApplications)
+                {
+                    try
+                    {
+                        _logger.LogInformation($"Attempting to send email for application {application.Id}");
+                        await SendApprovalEmailWithLicenseAsync(application);
+                    }
+                    catch (Exception appEx)
+                    {
+                        _logger.LogError(appEx, $"Failed to send email for application {application.Id}: {appEx.Message}");
+                    }
+                }
+                
+                _logger.LogInformation("Completed processing emails for approved applications");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing emails for approved applications: {ErrorMessage}", ex.Message);
             }
         }
     }

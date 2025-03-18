@@ -14,6 +14,13 @@ using Volo.Abp.PermissionManagement.Identity;
 using Volo.Abp.PermissionManagement.OpenIddict;
 using Volo.Abp.SettingManagement;
 using Volo.Abp.TenantManagement;
+using Microsoft.Extensions.Configuration;
+using System.Net.Mail;
+using System.Net;
+using Microsoft.Extensions.Logging;
+using System;
+using Volo.Abp.MailKit;
+using MailKit.Security;
 
 namespace AgriculturalRecordRenewal;
 
@@ -28,12 +35,21 @@ namespace AgriculturalRecordRenewal;
     typeof(AbpPermissionManagementDomainIdentityModule),
     typeof(AbpSettingManagementDomainModule),
     typeof(AbpTenantManagementDomainModule),
-    typeof(AbpEmailingModule)
+    typeof(AbpEmailingModule),
+    typeof(AbpMailKitModule)
 )]
 public class AgriculturalRecordRenewalDomainModule : AbpModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
+        var configuration = context.Services.GetConfiguration();
+
+        // Configurar MailKit
+        Configure<AbpMailKitOptions>(options =>
+        {
+            options.SecureSocketOption = SecureSocketOptions.Auto;
+        });
+
         Configure<AbpLocalizationOptions>(options =>
         {
             options.Languages.Add(new LanguageInfo("ar", "ar", "العربية"));

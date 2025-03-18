@@ -12,5 +12,6 @@ namespace AgriculturalRecordRenewal.Workflow
         Task<TaskDto> CompleteTaskAsync(string taskId, CompleteTaskDto input);
         Task<TaskDto> GetCurrentTaskAsync(string processInstanceId);
         Task AddCommentAsync(string taskId, string userId, string message);
+        Task ProcessPendingEmailsAsync();
     }
 } 
